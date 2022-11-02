@@ -1,0 +1,41 @@
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Sorting Visualizer</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Sans&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <script> var exports = {}; </script>
+    
+    <section class="header">Sort Visualizer</section>
+
+    <section class="sorting-stats">-</section>
+    
+    <section class="data-container">
+      <!-- [Computed] Array -->
+    </section> 
+    
+    <button class="button-generate" onclick="generate()">&nbsp;Generate New Array&nbsp;</button>   
+    <button class="button-sort" onclick="sort()">&nbsp;Sort&nbsp;</button>
+    
+    <div class="dropdown">
+      <button class="button-drop">&nbsp;Dropdown&nbsp;</button>
+      <div class="dropdown-content">
+        <!-- [Computed] Sorters -->
+      </div>
+    </div>
+    
+    <input type="range" min="0" max="400" value="50" class="slider-delay"">
+
+    <button class="button-cancel" onclick="cancel()">&nbsp;✖&nbsp;</button>
+
+    <script defer src="dist/bundle.js"></script>
+  </body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "mapRoot": "./src/",
+    "module": "ESNext",
+    "noImplicitAny": true,
+    "outDir": "./build/",
+    "allowSyntheticDefaultImports": true,
+    "preserveConstEnums": true,
+    "removeComments": true,
+    "rootDir": "./src/",
+    "sourceMap": true,
+    "sourceRoot": "./src/",
+    "target": "ESNext"
+  }
+}
