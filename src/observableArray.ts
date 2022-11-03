@@ -1,4 +1,4 @@
-import { CONFIG } from "./index";
+import { Controller } from "./controller";
 
 export type ObservableArrayContext = {
   read: (index: number) => number;
@@ -47,7 +47,7 @@ export class ObservableArray {
     o.frequency.value = notes[Math.min( ...[ noteIndex, notes.length - 1 ] )]
     g.connect(this._audioContext.destination)
     g.gain.exponentialRampToValueAtTime( 0.00001, this._audioContext.currentTime + reverb)
-    g.gain.value = 0.5
+    g.gain.value = 0.2
     o.start(0)
     o.stop(this._audioContext.currentTime + reverb)
   }
@@ -75,7 +75,7 @@ export class ObservableArray {
       read: this.read, 
       write: this.write,
       setClassName: (index: number, className: string) => this._array[index].className = className,
-      pause: () => this.pause(CONFIG.delay)
+      pause: () => this.pause(Controller.get().delay)
     });
   }
 
@@ -100,7 +100,7 @@ export class ObservableArray {
       this._array[index1].className = 'bar-red';
       this._array[index2].className = 'bar-yellow';
 
-      await this.pause(CONFIG.delay); 
+      await this.pause(Controller.get().delay); 
       return this.compareFn(value1, op, value2);
     })
   }
@@ -112,7 +112,7 @@ export class ObservableArray {
 
       this._array[index].className = 'bar-red';
 
-      await this.pause(CONFIG.delay);
+      await this.pause(Controller.get().delay);
       return this.compareFn(value1, op, value);
     })
   }
@@ -124,7 +124,7 @@ export class ObservableArray {
       this._array[index1].className = 'bar-blue';
       this._array[index2].className = 'bar-green';
 
-      await this.pause(CONFIG.delay / 2);
+      await this.pause(Controller.get().delay / 2);
       
       const tmp = actions.read(index1);
       actions.write(index1, actions.read(index2));
@@ -133,7 +133,7 @@ export class ObservableArray {
       this._array[index1].className = 'bar-green';
       this._array[index2].className = 'bar-blue';
       
-      await this.pause(CONFIG.delay / 2);
+      await this.pause(Controller.get().delay / 2);
     })
   }
 
@@ -141,7 +141,7 @@ export class ObservableArray {
     await this.command(`Set ${index} to ${value}`, async (actions) => {
       this._array[index].className = 'bar-blue';
       actions.write(index, value);
-      await this.pause(CONFIG.delay);
+      await this.pause(Controller.get().delay);
     })
   }
 
@@ -149,7 +149,7 @@ export class ObservableArray {
     return await this.command(`Get ${index}`, async (actions) => {
       this._array[index].className = 'bar-red';
       const value = actions.read(index);
-      await this.pause(CONFIG.delay);
+      await this.pause(Controller.get().delay);
       return value;
     })
   }

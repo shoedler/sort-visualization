@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "mapRoot": "./src/",
-    "module": "ESNext",
+    "module": "esnext",
     "noImplicitAny": true,
     "outDir": "./build/",
     "allowSyntheticDefaultImports": true,
@@ -10,6 +10,6 @@
     "rootDir": "./src/",
     "sourceMap": true,
     "sourceRoot": "./src/",
-    "target": "ESNext"
+    "target": "es2020",
   }
 }

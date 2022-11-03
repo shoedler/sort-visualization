@@ -22,8 +22,8 @@
       <!-- [Computed] Array -->
     </section> 
     
-    <button class="button-generate" onclick="generate()">&nbsp;Generate New Array&nbsp;</button>   
-    <button class="button-sort" onclick="sort()">&nbsp;Sort&nbsp;</button>
+    <button class="button-generate">&nbsp;Generate New Array&nbsp;</button>   
+    <button class="button-sort">&nbsp;Sort&nbsp;</button>
     
     <div class="dropdown">
       <button class="button-drop">&nbsp;Dropdown&nbsp;</button>
@@ -32,10 +32,12 @@
       </div>
     </div>
     
-    <input type="range" min="0" max="400" value="50" class="slider-delay"">
+    <input type="range" min="0" max="400" class="slider-delay">
+
+    <input type="range" min="10" max="300" step="10" class="slider-size">
 
     <button class="button-cancel" onclick="cancel()">&nbsp;✖&nbsp;</button>
 
-    <script defer src="dist/bundle.js"></script>
+    <script defer type="application/javascript" src="dist/bundle.js"></script>
   </body>
 </html>

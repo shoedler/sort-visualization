@@ -16,6 +16,6 @@ View, and listen to different sorting algorithms
 - [ ] In the delay slider callback, set animation time to 0.05, if the smallest delay is selected. Otherwise use the default, pretty looking 0.1
 
 ## Usage
-- Run `npm install`
+- Run `npm ci`
 - Run `npm run start`
 
