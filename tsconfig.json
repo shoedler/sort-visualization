@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "mapRoot": "./src/",
-    "module": "esnext",
+    "module": "NodeNext",
     "noImplicitAny": true,
     "outDir": "./build/",
     "allowSyntheticDefaultImports": true,

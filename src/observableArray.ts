@@ -1,4 +1,5 @@
 import { Controller } from "./controller";
+import { CssVariables } from "./domAdapter";
 
 export type ObservableArrayContext = {
   read: (index: number) => number;
@@ -20,22 +21,22 @@ export class ObservableArrayStats {
 }
 
 export interface IObservableArraySorter {
-  sort(array: ObservableArray): Promise<ObservableArrayStats>;
+  sort(array: ObservableArrayWrapper): Promise<ObservableArrayStats>;
 }
 
-export class ObservableArray {
-  private _array: HTMLElement[] = [];
-  private _statsSink: HTMLSpanElement;
+export class ObservableArrayWrapper {
+  private _array: HTMLDivElement[] = [];
   private _stats: ObservableArrayStats = {} as ObservableArrayStats;
   private _audioContext: AudioContext = null;
+  private _controller: Controller = null;
 
   public get stats(): ObservableArrayStats { return this._stats; }
   public get length(): number { return this._array.length; }
 
-  constructor(domDivArray: HTMLDivElement[], statsSink: HTMLSpanElement) {
+  constructor(controller: Controller, domDivArray: HTMLDivElement[]) {
+    this._controller = controller;
     this._stats = new ObservableArrayStats();
     this._array = domDivArray
-    this._statsSink = statsSink;
     this._audioContext = new AudioContext();
   }
 
@@ -69,13 +70,13 @@ export class ObservableArray {
   }
   
   public command = async <TRet>(name: string, fn: (actions: ObservableArrayContext) => Promise<TRet>): Promise<TRet> => {
-    this._statsSink.innerHTML = `Reads ${this._stats.reads} | Writes ${this._stats.writes} | Comparisons ${this._stats.comparisons} | Swaps ${this._stats.swaps}`;
     this._array.forEach(div => div.className = "");
+    this._controller.currentStats = this._stats;
     return fn({ 
       read: this.read, 
       write: this.write,
       setClassName: (index: number, className: string) => this._array[index].className = className,
-      pause: () => this.pause(Controller.get().delay)
+      pause: () => this.pause(this._controller.delay)
     });
   }
 
@@ -94,13 +95,14 @@ export class ObservableArray {
   public compare = async (index1: number, op: '>' | '>=' | '<' | '<=' | '==' | '!=', index2: number): Promise<boolean> => {
     this._stats.comparisons++;
     return await this.command(`Compare a[${index1}] ${op} a[${index2}] `, async (actions) => {
+      this._array[index1].className = CssVariables.compareColorA;
+      this._array[index2].className = CssVariables.compareColorB;
+
       const value1 = actions.read(index1);
+      await this.pause(this._controller.delay / 2); 
       const value2 = actions.read(index2);
+      await this.pause(this._controller.delay / 2); 
 
-      this._array[index1].className = 'bar-red';
-      this._array[index2].className = 'bar-yellow';
-
-      await this.pause(Controller.get().delay); 
       return this.compareFn(value1, op, value2);
     })
   }
@@ -110,9 +112,9 @@ export class ObservableArray {
     return await this.command(`Compare a[${index}] ${op} ${value} `, async (actions) => {
       const value1 = actions.read(index);
 
-      this._array[index].className = 'bar-red';
+      this._array[index].className = CssVariables.compareColorA;
 
-      await this.pause(Controller.get().delay);
+      await this.pause(this._controller.delay);
       return this.compareFn(value1, op, value);
     })
   }
@@ -121,35 +123,36 @@ export class ObservableArray {
     this._stats.swaps++;
     await this.command(`Swap ${index1} and ${index2}`, async (actions) => {
 
-      this._array[index1].className = 'bar-blue';
-      this._array[index2].className = 'bar-green';
+      this._array[index1].className = CssVariables.swapColorA;
+      this._array[index2].className = CssVariables.swapColorB;
 
-      await this.pause(Controller.get().delay / 2);
-      
       const tmp = actions.read(index1);
+
+      await this.pause(this._controller.delay / 2);
+
       actions.write(index1, actions.read(index2));
       actions.write(index2, tmp);
 
-      this._array[index1].className = 'bar-green';
-      this._array[index2].className = 'bar-blue';
+      this._array[index1].className = CssVariables.swapColorB;
+      this._array[index2].className = CssVariables.swapColorA;
       
-      await this.pause(Controller.get().delay / 2);
+      await this.pause(this._controller.delay / 2);
     })
   }
 
   public set = async (index: number, value: number): Promise<void> => {
     await this.command(`Set ${index} to ${value}`, async (actions) => {
-      this._array[index].className = 'bar-blue';
+      this._array[index].className = CssVariables.writeColor;
       actions.write(index, value);
-      await this.pause(Controller.get().delay);
+      await this.pause(this._controller.delay);
     })
   }
 
   public get = async (index: number): Promise<number> => {
     return await this.command(`Get ${index}`, async (actions) => {
-      this._array[index].className = 'bar-red';
+      this._array[index].className = CssVariables.readColor;
       const value = actions.read(index);
-      await this.pause(Controller.get().delay);
+      await this.pause(this._controller.delay);
       return value;
     })
   }

@@ -3,6 +3,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    
     <title>Sorting Visualizer</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,29 +15,16 @@
   <body>
     <script> var exports = {}; </script>
     
-    <section class="header">Sort Visualizer</section>
-
-    <section class="sorting-stats">-</section>
-    
-    <section class="data-container">
-      <!-- [Computed] Array -->
-    </section> 
-    
-    <button class="button-generate">&nbsp;Generate New Array&nbsp;</button>   
-    <button class="button-sort">&nbsp;Sort&nbsp;</button>
-    
-    <div class="dropdown">
-      <button class="button-drop">&nbsp;Dropdown&nbsp;</button>
-      <div class="dropdown-content">
-        <!-- [Computed] Sorters -->
+    <section id="header">Sorting Algorithm Visualizer</section>
+    <div id="wrapper">
+      <div id="data-container">
+        <!-- [Computed] Array -->
+      </div> 
+      <div id="controls-container">
+        <!-- [Computed] Tweakpane -->
       </div>
     </div>
-    
-    <input type="range" min="0" max="400" class="slider-delay">
 
-    <input type="range" min="10" max="300" step="10" class="slider-size">
-
-    <button class="button-cancel" onclick="cancel()">&nbsp;✖&nbsp;</button>
 
     <script defer type="application/javascript" src="dist/bundle.js"></script>
   </body>

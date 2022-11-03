@@ -1,5 +1,5 @@
-import { IObservableArraySorter } from "./observableArray";
-import { ViewService } from "./viewService";
+import { DOMAdapter as DOMAdapter } from "./domAdapter";
+import { IObservableArraySorter, ObservableArrayStats, ObservableArrayWrapper } from "./observableArray";
 
 const StorageKeys = {
   sourceArray: "sourceArray",
@@ -10,24 +10,17 @@ const StorageKeys = {
 }
 
 export class Controller {
-  private static _instance: Controller;
-  public static build = (sorterLookup: { [key: string]: IObservableArraySorter; }): Controller => {
-    if (this._instance)
-      throw new Error("Controller can only be instantiated once");
-    this._instance = new Controller(sorterLookup);
-    return this._instance;
-  };
-  public static get = (): Controller => {
-    if (this._instance)
-      return this._instance;
-    throw new Error("Controller must be built first");
-  };
-  private constructor(sorters: { [key: string]: IObservableArraySorter; }) {
+  private readonly _domAdapter: DOMAdapter;
+
+  public constructor(
+      domAdapter: DOMAdapter, 
+      sorters: { [key: string]: IObservableArraySorter; }
+    ) {
+    this._domAdapter = domAdapter;
     this._sorterLookup = sorters;
-  }
-  
-  public get sorter(): IObservableArraySorter {
-    return this._sorterLookup[this.sorterName];
+    window.addEventListener("resize", () => {
+      this._domAdapter.updateVisualArray(this._cachedSourceArray, this.barSpanFactor);
+    });
   }
 
   private readonly _sorterLookup: { [key: string]: IObservableArraySorter; };
@@ -41,9 +34,8 @@ export class Controller {
     return this._sorterName
   }
   public set sorterName(v: string) {
-    if (!(v in Object.keys(this._sorterLookup)))
-      throw new Error(`Unknown sorter '${v}'`)
-    ViewService.get().setDropdownButtonLabel(v);
+    if (!Object.keys(this._sorterLookup).includes(v))
+      throw new Error(`Unknown sorter '${v}', must be one of ${Object.keys(this._sorterLookup).join(", ")}`);	
     this._sorterName = v;
     localStorage.setItem(StorageKeys.sorterName, v.toString());
   }
@@ -55,9 +47,9 @@ export class Controller {
   }
   public set barSpanFactor(v: number) {
     this._barSpanFactor = v;
+    this._domAdapter.updateVisualArray(this._cachedSourceArray, this.barSpanFactor);
     localStorage.setItem(StorageKeys.barSpanFactor, v.toString());
   }
-
 
   private _delay?: number = null;
   public get delay(): number {
@@ -69,6 +61,19 @@ export class Controller {
     localStorage.setItem(StorageKeys.delay, v.toString());
   }
 
+  private _currentStats: ObservableArrayStats = new ObservableArrayStats();
+  public set currentStats(v: ObservableArrayStats) {
+    this._currentStats = v;
+  }
+  public get currentStats(): ObservableArrayStats {
+    return this._currentStats;
+  }
+  public get currentReads(): number { return this._currentStats.reads ?? 0; }
+  public get currentWrites(): number { return this._currentStats.writes ?? 0; }
+  public get currentComparisons(): number { return this._currentStats.comparisons ?? 0; }
+  public get currentSwaps(): number { return this._currentStats.swaps ?? 0; }
+
+
   private _cachedSourceArray: number[] = [];
   private _sourceArraySize?: number = null;
   public get sourceArraySize(): number {
@@ -78,7 +83,6 @@ export class Controller {
   public set sourceArraySize(v: number) {  
     this._sourceArraySize = v; 
     localStorage.setItem(StorageKeys.sourceArraySize, v.toString());
-    
     this.retrieveSourceArray();
     this.reshapeSourceArray();
   }
@@ -99,19 +103,19 @@ export class Controller {
     }
 
     localStorage.setItem(StorageKeys.sourceArray, JSON.stringify(this._cachedSourceArray));
-    ViewService.get().updateVisualArray(this._cachedSourceArray, this.barSpanFactor);
+    this._domAdapter.updateVisualArray(this._cachedSourceArray, this.barSpanFactor);
   }
   public retrieveSourceArray = (): number[] => {
     let arr: number[];
 
     if ((arr = this._cachedSourceArray).length > 0) {
-      ViewService.get().updateVisualArray(arr, this.barSpanFactor);
+      this._domAdapter.updateVisualArray(arr, this.barSpanFactor);
       return arr
     }
     
     if ((arr = JSON.parse(localStorage.getItem(StorageKeys.sourceArray) ?? "[]") as number[]).length > 0) {
       this._cachedSourceArray = arr;
-      ViewService.get().updateVisualArray(arr, this.barSpanFactor);
+      this._domAdapter.updateVisualArray(arr, this.barSpanFactor);
       return arr;
     }
     
@@ -120,8 +124,16 @@ export class Controller {
 
     localStorage.setItem(StorageKeys.sourceArray, JSON.stringify(arr));
     this._cachedSourceArray = arr;
-    ViewService.get().updateVisualArray(arr, this.barSpanFactor);
+    this._domAdapter.updateVisualArray(arr, this.barSpanFactor);
 
     return arr;
+  }
+
+  public sort = async (before: () => any, after: () => any): Promise<void> => {
+    before()
+    const observableArray = new ObservableArrayWrapper(this, this._domAdapter.getArray());
+    const stats = await this._sorterLookup[this._sorterName].sort(observableArray);
+    console.log(stats);
+    after();
   }
 }

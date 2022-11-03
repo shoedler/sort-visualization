@@ -1,7 +1,7 @@
-import { IObservableArraySorter, ObservableArray, ObservableArrayStats } from "./observableArray";
+import { IObservableArraySorter, ObservableArrayWrapper, ObservableArrayStats } from "./observableArray";
 
 export class ObservableBubbleSort implements IObservableArraySorter {
-  public sort = async (array: ObservableArray): Promise<ObservableArrayStats> => {
+  public sort = async (array: ObservableArrayWrapper): Promise<ObservableArrayStats> => {
     for (let i = 0; i < array.length; i++) {
       for (let j = 0; j < array.length - i - 1; j++) {
         if (await array.compare(j, '>', j + 1)) {
@@ -14,7 +14,7 @@ export class ObservableBubbleSort implements IObservableArraySorter {
 }
 
 export class ObservableInsertionSort implements IObservableArraySorter {
-  public sort = async (array: ObservableArray): Promise<ObservableArrayStats> => {
+  public sort = async (array: ObservableArrayWrapper): Promise<ObservableArrayStats> => {
     for (let i = 0; i < array.length; i++) {
       let j = i;
       let x = await array.get(i);
@@ -28,7 +28,7 @@ export class ObservableInsertionSort implements IObservableArraySorter {
 }
 
 export class ObservableSelectionSort implements IObservableArraySorter {
-  public sort = async (array: ObservableArray): Promise<ObservableArrayStats> => {
+  public sort = async (array: ObservableArrayWrapper): Promise<ObservableArrayStats> => {
     for (let i = 0; i < array.length - 1; i++) {
       let minIndex = i;
       for (let j = i + 1; j < array.length; j++) {
@@ -43,12 +43,12 @@ export class ObservableSelectionSort implements IObservableArraySorter {
 }
 
 export class ObservableQuickSort implements IObservableArraySorter {
-  public sort = async (array: ObservableArray): Promise<ObservableArrayStats> => {
+  public sort = async (array: ObservableArrayWrapper): Promise<ObservableArrayStats> => {
     await this.quickSort(array, 0, array.length - 1);
     return array.stats;
   }
 
-  private quickSort = async (array: ObservableArray, low: number, high: number): Promise<void> => {
+  private quickSort = async (array: ObservableArrayWrapper, low: number, high: number): Promise<void> => {
     if (low < high) {;
       const pi = await this.partition(array, low, high, await this.findPivot(array, low, high));
       await this.quickSort(array, low, pi - 1);
@@ -56,7 +56,7 @@ export class ObservableQuickSort implements IObservableArraySorter {
     }
   }
 
-  private partition = async (array: ObservableArray, low: number, high: number, pivotIndex: number): Promise<number> => {
+  private partition = async (array: ObservableArrayWrapper, low: number, high: number, pivotIndex: number): Promise<number> => {
     const pivot = await array.get(pivotIndex);
     await array.swap(pivotIndex, high);
     let i = low;
@@ -71,7 +71,7 @@ export class ObservableQuickSort implements IObservableArraySorter {
     return i;
   }
 
-  private findPivot = async (array: ObservableArray, low: number, high: number): Promise<number> => {
+  private findPivot = async (array: ObservableArrayWrapper, low: number, high: number): Promise<number> => {
 		const mid = Math.floor((low + high) / 2);
 
 		const a = array.get(low);
@@ -90,7 +90,7 @@ export class ObservableQuickSort implements IObservableArraySorter {
 }
 
 export class ObservableHeapSort implements IObservableArraySorter {
-  public sort = async (array: ObservableArray): Promise<ObservableArrayStats> => {
+  public sort = async (array: ObservableArrayWrapper): Promise<ObservableArrayStats> => {
     // Build Heap
     for (let i = Math.floor(array.length / 2) - 1; i >= 0; i--) {
       await this.heapify(array, array.length, i);
@@ -104,7 +104,7 @@ export class ObservableHeapSort implements IObservableArraySorter {
     return array.stats;
   }
 
-  private heapify = async (array: ObservableArray, n: number, i: number): Promise<void> => {
+  private heapify = async (array: ObservableArrayWrapper, n: number, i: number): Promise<void> => {
     let largest = i;
     const l = 2 * i + 1;
     const r = 2 * i + 2;
@@ -125,7 +125,7 @@ export class ObservableHeapSort implements IObservableArraySorter {
 }
 
 export class ObservableRadixSort implements IObservableArraySorter {
-  public sort = async (array: ObservableArray): Promise<ObservableArrayStats> => {
+  public sort = async (array: ObservableArrayWrapper): Promise<ObservableArrayStats> => {
     const max = await this.getMax(array);
     for (let exp = 1; Math.floor(max / exp) > 0; exp *= 10) {
       await this.countSort(array, exp);
@@ -133,7 +133,7 @@ export class ObservableRadixSort implements IObservableArraySorter {
     return array.stats;
   }
 
-  private getMax = async (array: ObservableArray): Promise<number> => {
+  private getMax = async (array: ObservableArrayWrapper): Promise<number> => {
     let max = await array.get(0);
     for (let i = 1; i < array.length; i++) {
       if (await array.compareWithVal(i, '>', max)) {
@@ -143,7 +143,7 @@ export class ObservableRadixSort implements IObservableArraySorter {
     return max;
   }
 
-  private countSort = async (array: ObservableArray, exp: number): Promise<void> => {
+  private countSort = async (array: ObservableArrayWrapper, exp: number): Promise<void> => {
     const output = new Array(array.length);
     const count = new Array(10).fill(0);
 
@@ -167,7 +167,7 @@ export class ObservableRadixSort implements IObservableArraySorter {
 }
 
 export class ObservableShellSort implements IObservableArraySorter {
-  public sort = async (array: ObservableArray): Promise<ObservableArrayStats> => {
+  public sort = async (array: ObservableArrayWrapper): Promise<ObservableArrayStats> => {
     for (let gap = Math.floor(array.length / 2); gap > 0; gap = Math.floor(gap / 2)) {
       for (let i = gap; i < array.length; i++) {
         let temp = await array.get(i);
@@ -183,7 +183,7 @@ export class ObservableShellSort implements IObservableArraySorter {
 }
 
 export class ObservableCombSort implements IObservableArraySorter {
-  public sort = async (array: ObservableArray): Promise<ObservableArrayStats> => {
+  public sort = async (array: ObservableArrayWrapper): Promise<ObservableArrayStats> => {
     let gap = array.length;
     let swapped = true;
 
@@ -203,12 +203,12 @@ export class ObservableCombSort implements IObservableArraySorter {
 }
 
 export class ObservableMergeSort implements IObservableArraySorter {
-  public sort = async (array: ObservableArray): Promise<ObservableArrayStats> => {
+  public sort = async (array: ObservableArrayWrapper): Promise<ObservableArrayStats> => {
     await this.mergeSort(array, 0, array.length - 1);
     return array.stats;
   }
 
-  private mergeSort = async (array: ObservableArray, l: number, r: number): Promise<void> => {
+  private mergeSort = async (array: ObservableArrayWrapper, l: number, r: number): Promise<void> => {
     if (l < r) {
       const m = Math.floor((l + r) / 2);
       await this.mergeSort(array, l, m);
@@ -217,7 +217,7 @@ export class ObservableMergeSort implements IObservableArraySorter {
     }
   }
 
-  private merge = async (array: ObservableArray, l: number, m: number, r: number): Promise<void> => {
+  private merge = async (array: ObservableArrayWrapper, l: number, m: number, r: number): Promise<void> => {
     const n1 = m - l + 1;
     const n2 = r - m;
 
