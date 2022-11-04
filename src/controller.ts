@@ -1,5 +1,5 @@
 import { DOMAdapter as DOMAdapter } from "./domAdapter";
-import { IObservableArraySorter, ObservableArrayStats, ObservableArrayWrapper } from "./observableArray";
+import { IObservableArraySorter, ObservableArrayStats, ObservableArray } from "./observableArray";
 
 const StorageKeys = {
   sourceArray: "sourceArray",
@@ -131,7 +131,7 @@ export class Controller {
 
   public sort = async (before: () => any, after: () => any): Promise<void> => {
     before()
-    const observableArray = new ObservableArrayWrapper(this, this._domAdapter.getArray());
+    const observableArray = new ObservableArray(this, this._domAdapter.getArray());
     const stats = await this._sorterLookup[this._sorterName].sort(observableArray);
     console.log(stats);
     after();
