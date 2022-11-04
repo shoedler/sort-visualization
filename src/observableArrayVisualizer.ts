@@ -1,7 +1,8 @@
 import { IObservableArrayVisualizer } from "./observableArray";
 
 const Selectors = {
-  container: "data-container",
+  dataContainer: "data-container",
+  controlsContainer: "controls-container",
   compareColorA: "bar-compare-a", // css var & html class
   compareColorB: "bar-compare-b", // css var & html class
   swapColorA: "bar-swap-a", // css var & html class
@@ -12,6 +13,7 @@ const Selectors = {
 }
 
 export interface IObservableArrayVisualizerConfigProvider {
+  readonly barSpanFactor: number;
   readonly barCompareColorA: string;
   readonly barCompareColorB: string;
   readonly barSwapColorA: string;
@@ -21,60 +23,107 @@ export interface IObservableArrayVisualizerConfigProvider {
   readonly transitionTime: number;
 }
 
-export class ObservableArrayVisualizer implements IObservableArrayVisualizer {
+export default function useObservableArrayVisualizer(configProvider: IObservableArrayVisualizerConfigProvider) {
+  return new ObservableArrayVisualizer(configProvider);
+}
+
+class ObservableArrayVisualizer implements IObservableArrayVisualizer {
   private readonly _configProvider: IObservableArrayVisualizerConfigProvider;
-  private readonly _dataContainer: HTMLDivElement = document.getElementById(Selectors.container) as HTMLDivElement;
+  private readonly _dataContainer: HTMLDivElement = document.getElementById(Selectors.dataContainer) as HTMLDivElement;
+  private readonly _controlsContainer: HTMLDivElement = document.getElementById(Selectors.controlsContainer) as HTMLDivElement;
 
   public constructor(configProvider: IObservableArrayVisualizerConfigProvider) {
     this._configProvider = configProvider;
   }
 
-  private getArray = (): HTMLDivElement[] => Array.from(this._dataContainer.children) as HTMLDivElement[];
+  private _array: HTMLDivElement[] = Array.from(this._dataContainer.children) as HTMLDivElement[];
+
+  public get controlsContainer(): HTMLDivElement { return this._controlsContainer }
+
+  public getLength(): number {
+    return this._dataContainer.children.length
+  }
+
+  public clearStyles(): void {
+    this._array.forEach(div => div.className = "");
+  }
 
   public setStyle = (index: number, type: "read" | "write" | "swapA" | "swapB" | "compareA" | "compareB"): void => {
-    throw new Error("Method not implemented.");
   }
-  public setValue = (index: number, height: number): void => {
-    throw new Error("Method not implemented.");
+
+  public setValue = (index: number, value: number): void => {
+    this._array[index].style.height = `${value}px`;
   }
+
   public getValue = (index: number): number => {
-    throw new Error("Method not implemented.");
+    return parseInt(this._array[index].style.height);
   }
 
-  public updateVisualArray = (arr: number[], barSpanFactor: number) => {
-    this._dataContainer.replaceChildren(...[]);
-
+  private calcSizes = (len: number): { 
+    availableBarHeight: number,
+    availableBarWidth: number,
+    barWidth: number, 
+    barMargin: number } => {
     const width = parseFloat(getComputedStyle(this._dataContainer).width);
     const height = this._dataContainer.clientHeight;
 
     const availableBarHeight = height * 0.9;
-    const availableBarWidth = width / arr.length;
+    const availableBarWidth = width / len;
     
-    const barWidth = availableBarWidth * barSpanFactor;
+    const barWidth = availableBarWidth * this._configProvider.barSpanFactor;
     const barMargin = (availableBarWidth - barWidth) / 2;
 
-    let barPos = barMargin;
+    return { availableBarHeight, availableBarWidth, barWidth, barMargin }
+  }
 
-    for (let i = 0; i < arr.length; i++) {
-      const value = arr[i];
+  private setIthBar = (bar: HTMLDivElement, value: number, barPos: number, sizes: { barWidth: number, barMargin: number, availableBarHeight: number }): number => {
+    bar.style.width = `${sizes.barWidth}px`;
+    bar.style.transform = `translateX(${barPos}px)`;
+    bar.style.height = `${value * sizes.availableBarHeight / 100}px`;
+    bar.style.borderRadius = `${sizes.barWidth / 2}px`;
+
+    return sizes.barWidth + sizes.barMargin * 2;
+  }
+
+  public redrawArray = (): void => {
+    const sizes = this.calcSizes(this._array.length);
+
+    let barPos = sizes.barMargin;
+
+    for (let i = 0; i < this._array.length; i++) {
+      const value = parseInt(this._array[i].id, 10);
+      const bar = this._array[i];
+      
+      barPos += this.setIthBar(bar, value, barPos, sizes);
+    }
+  }
+
+  public rebuildArray = (sourceArray: number[]): void => {
+    this._dataContainer.replaceChildren(...[]);
+
+    const sizes = this.calcSizes(sourceArray.length)
+
+    let barPos = sizes.barMargin;
+
+    for (let i = 0; i < sourceArray.length; i++) {
+      const value = sourceArray[i];
       const bar = document.createElement("div");
       
-      bar.style.width = `${barWidth}px`;
-      bar.style.transform = `translateX(${barPos}px)`;
-      bar.style.height = `${value * availableBarHeight / 100}px`;
-      bar.style.borderRadius = `${barWidth / 2}px`;
-      
-      barPos += barWidth + barMargin * 2;
+      barPos += this.setIthBar(bar, value, barPos, sizes);
 
       const barLabel = document.createElement("label");
       barLabel.innerHTML = value.toString();
 
       // Update the bar's label on resize
-      new ResizeObserver(_ => { barLabel.innerHTML = Math.ceil(parseInt(bar.style.height, 10)  / availableBarHeight * 100).toFixed(0); }).observe(bar);
+      new ResizeObserver(_ => { 
+        barLabel.innerHTML = Math.ceil(parseInt(bar.style.height, 10)  / sizes.availableBarHeight * 100).toFixed(0); 
+      }).observe(bar);
 
       bar.appendChild(barLabel);
       this._dataContainer.appendChild(bar);
     }
+
+    this._array = Array.from(this._dataContainer.children) as HTMLDivElement[];
   };
 
   
