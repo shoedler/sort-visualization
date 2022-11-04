@@ -11,17 +11,17 @@ export class Model implements IObservableArrayConfigProvider, IObservableArrayVi
 
   private defaults = () => {
     this._sorterName = Object.keys(Sorters)[0];
-    this._delay = 30;
-    this._sourceArraySize = 100;
+    this._delay = 300;
+    this._sourceArraySize = 30;
 
-    this._barSpanFactor = 0.6;
+    this._barSpanFactor = 0.5;
     this._transitionTime = 0.1;
-    this._compareColorA = "#ff6600";
-    this._compareColorB = "#f44336";
+    this._compareColorA = "#ff5346";
+    this._compareColorB = "#ff954e";
     this._readColor = "#ffeb3b";
-    this._swapColorA = "#18beff";
-    this._swapColorB = "#00bcd4";
-    this._writeColor = "#4caf50";
+    this._swapColorA = "#5dc7ce";
+    this._swapColorB = "#4580c7";
+    this._writeColor = "#67ca6b";
 
     this._gain = 0.2;
 

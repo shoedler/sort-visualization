@@ -1,14 +1,14 @@
 const CSSColors = {
-  compareColorA: "bar-compare-a", // css var & html class
-  compareColorB: "bar-compare-b", // css var & html class
-  swapColorA: "bar-swap-a", // css var & html class
-  swapColorB: "bar-swap-b", // css var & html class
-  readColor: "bar-read", // css var & html class
-  writeColor: "bar-write", // css var & html class
+  compareColorA: "bar-compare-a",
+  compareColorB: "bar-compare-b",
+  swapColorA: "bar-swap-a",
+  swapColorB: "bar-swap-b",
+  readColor: "bar-read",
+  writeColor: "bar-write",
 }
 
 const CSSRules = {
-  transitionTime: "transition-time", // css var & html class
+  transitionTime: "transition-time",
   ...CSSColors
 }
 

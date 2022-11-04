@@ -11,8 +11,8 @@ const CompareOperations = {
 }
 
 export type ObservableArrayContext = {
-  read: (index: number) => number;
-  write: (index: number, value: number) => void;
+  read: (index: number, sound?: boolean) => number;
+  write: (index: number, value: number, sound?: boolean) => void;
   pause: () => Promise<void>;
 }
 
@@ -85,22 +85,23 @@ class ObservableArray implements IObservableArray {
   private pause = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
 
   // Atomic function to read from the array - this is the only way to read from it
-  private read = (index: number): number => {
+  private read = (index: number, sound: boolean = true): number => {
     this._stats.reads++;
-    this._audioPlayer.sound(index + 60, 'sine');
+    if (sound)
+      this._audioPlayer.sound(index + 60, 'sine');
     return this._visualizer.getValue(index)
   }
 
   // Atomic function to write to the array - this is the only way to write to it
-  private write = (index: number, value: number): void => {
+  private write = (index: number, value: number, sound: boolean = true): void => {
     this._stats.writes++;
-    this._audioPlayer.sound(index + 40, 'sawtooth');
+    if (sound)
+      this._audioPlayer.sound(index + 40, 'sawtooth');
     this._visualizer.setValue(index, value);
   }
   
   public command = async <TRet>(name: string, fn: (actions: ObservableArrayContext) => Promise<TRet>): Promise<TRet> => {
     this._visualizer.clearStyles()
-    // this._controller.currentStats = this._stats;
     return fn({ 
       read: this.read, 
       write: this.write,
@@ -112,10 +113,9 @@ class ObservableArray implements IObservableArray {
     this._stats.comparisons++;
     return await this.command(`Compare a[${index1}] ${op} a[${index2}] `, async (actions) => {
       this._visualizer.setStyle(index1, "compareColorA")
-      this._visualizer.setStyle(index2, "compareColorB")
-
       const value1 = actions.read(index1);
       await this.pause(this._configProvider.delay / 2); 
+      this._visualizer.setStyle(index2, "compareColorB")
       const value2 = actions.read(index2);
       await this.pause(this._configProvider.delay / 2); 
 
@@ -127,7 +127,6 @@ class ObservableArray implements IObservableArray {
     this._stats.comparisons++;
     return await this.command(`Compare a[${index}] ${op} ${value} `, async (actions) => {
       const value1 = actions.read(index);
-
       this._visualizer.setStyle(index, "compareColorA")
 
       await this.pause(this._configProvider.delay);
@@ -142,11 +141,12 @@ class ObservableArray implements IObservableArray {
       this._visualizer.setStyle(index2, "swapColorB")
 
       const tmp = actions.read(index1);
-
+      const tmp2 = actions.read(index2, false);
+      
       await this.pause(this._configProvider.delay / 2);
 
-      actions.write(index1, actions.read(index2));
-      actions.write(index2, tmp);
+      actions.write(index1, tmp2);
+      actions.write(index2, tmp, false);
 
       this._visualizer.setStyle(index1, "swapColorB")
       this._visualizer.setStyle(index2, "swapColorA")
