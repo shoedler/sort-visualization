@@ -1,26 +1,45 @@
-import { IObservableArrayVisualizer } from "./observableArray";
-
-const Selectors = {
-  dataContainer: "data-container",
-  controlsContainer: "controls-container",
+const CSSColors = {
   compareColorA: "bar-compare-a", // css var & html class
   compareColorB: "bar-compare-b", // css var & html class
   swapColorA: "bar-swap-a", // css var & html class
   swapColorB: "bar-swap-b", // css var & html class
   readColor: "bar-read", // css var & html class
   writeColor: "bar-write", // css var & html class
+}
+
+const CSSRules = {
   transitionTime: "transition-time", // css var & html class
+  ...CSSColors
+}
+
+const Selectors = {
+  dataContainer: "data-container",
+  controlsContainer: "controls-container",
 }
 
 export interface IObservableArrayVisualizerConfigProvider {
   readonly barSpanFactor: number;
-  readonly barCompareColorA: string;
-  readonly barCompareColorB: string;
-  readonly barSwapColorA: string;
-  readonly barSwapColorB: string;
-  readonly barReadColor: string;
-  readonly barWriteColor: string;
+  readonly compareColorA: string;
+  readonly compareColorB: string;
+  readonly swapColorA: string;
+  readonly swapColorB: string;
+  readonly readColor: string;
+  readonly writeColor: string;
   readonly transitionTime: number;
+}
+
+export interface IObservableArrayVisualizer {
+
+  setStyle(index: number, type: keyof typeof CSSColors): void;
+  clearStyles(): void;
+  setValue(index: number, value: number): void;
+  getValue(index: number): number;
+  getLength(): number;
+  
+  rebuildArray(sourceArray: number[]): void;
+  redrawArray(): void;
+  updateCssRule(rule: keyof typeof CSSRules & keyof IObservableArrayVisualizerConfigProvider): void;
+  readonly controlsContainer: HTMLElement;
 }
 
 export default function useObservableArrayVisualizer(configProvider: IObservableArrayVisualizerConfigProvider) {
@@ -48,7 +67,8 @@ class ObservableArrayVisualizer implements IObservableArrayVisualizer {
     this._array.forEach(div => div.className = "");
   }
 
-  public setStyle = (index: number, type: "read" | "write" | "swapA" | "swapB" | "compareA" | "compareB"): void => {
+  public setStyle = (index: number, type: keyof typeof CSSColors): void => {
+    this._array[index].className = CSSColors[type]
   }
 
   public setValue = (index: number, value: number): void => {
@@ -129,20 +149,9 @@ class ObservableArrayVisualizer implements IObservableArrayVisualizer {
   
 
   private setRootStyle = (name: string, value: string) => (document.querySelector(':root') as HTMLElement).style.setProperty(name, value)
-  private getRootStyle = (name: string) => getComputedStyle(document.querySelector(':root')).getPropertyValue(name).trim();
 
-  // public get barCompareColorB() { return this.getRootStyle('--' + Selectors.compareColorB).trim(); }
-  // public get barCompareColorA() { return this.getRootStyle('--' + Selectors.compareColorA).trim(); }
-  // public get barSwapColorA() { return this.getRootStyle('--' + Selectors.swapColorA);}
-  // public get barSwapColorB() { return this.getRootStyle('--' + this._config.barSwapColorB).trim(); }
-  // public get barReadColor() { return this.getRootStyle('--' + Selectors.readColor).trim(); }
-  // public get barWriteColor() { return this.getRootStyle('--' + Selectors.writeColor).trim(); }
-  // public get transitionTime() { return parseFloat(this.getRootStyle('--' + Selectors.transitionTime).trim()); }
-  public updateBarCompareColorA = () =>  this.setRootStyle('--' + Selectors.compareColorA, this._configProvider.barCompareColorA); 
-  public updateBarCompareColorB = () =>  this.setRootStyle('--' + Selectors.compareColorB, this._configProvider.barCompareColorB); 
-  public updateBarSwapColorA = () =>  this.setRootStyle('--' + Selectors.swapColorA, this._configProvider.barSwapColorA); 
-  public updateBarSwapColorB = () =>  this.setRootStyle('--' + Selectors.swapColorB, this._configProvider.barSwapColorB); 
-  public updateBarReadColor = () =>  this.setRootStyle('--' + Selectors.readColor, this._configProvider.barReadColor); 
-  public updateBarWriteColor = () =>  this.setRootStyle('--' + Selectors.writeColor, this._configProvider.barWriteColor); 
-  public updateTransitionTime = () =>  this.setRootStyle('--' + Selectors.transitionTime, this._configProvider.transitionTime + 's'); 
+  public updateCssRule = (rule: keyof typeof CSSRules & keyof IObservableArrayVisualizerConfigProvider): void => {
+    const value = rule.toLocaleLowerCase().includes('time') ? this._configProvider[rule] + 's' : this._configProvider[rule] as string;
+    this.setRootStyle('--' + CSSRules[rule], value)
+  }
 }

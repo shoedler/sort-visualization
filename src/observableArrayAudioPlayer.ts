@@ -1,5 +1,3 @@
-import { IObservableArrayAudioPlayer } from "./observableArray";
-
 const notes = Object.values({
   'C0' : 16.35,  'C#0': 17.32,  'Db0': 17.32,  'D0': 18.35,  'D#0': 19.45,  'Eb0': 19.45,  'E0': 20.60,  'F0': 21.83,
   'F#0': 23.12,  'Gb0': 23.12,  'G0': 24.50,  'G#0': 25.96,  'Ab0': 25.96,  'A0': 27.50,  'A#0': 29.14,  'Bb0': 29.14,
@@ -25,6 +23,11 @@ export interface IObservableArrayAudioPlayerConfigProvider {
   readonly gain: number;
 }
 
+export interface IObservableArrayAudioPlayer {
+  sound(noteIndex: number, type: OscillatorType, reverb?: number): void
+}
+
+
 export default function useObservableArrayAudioPlayer(configProvider: IObservableArrayAudioPlayerConfigProvider): IObservableArrayAudioPlayer { 
   return new ObservableArrayAudioPlayer(configProvider)
 }
@@ -32,22 +35,33 @@ export default function useObservableArrayAudioPlayer(configProvider: IObservabl
 class ObservableArrayAudioPlayer implements IObservableArrayAudioPlayer {
   private readonly _configProvider: IObservableArrayAudioPlayerConfigProvider;
   private readonly _audioContext: AudioContext = null;
+  private readonly _analyzer: AnalyserNode = null;
 
-  public sound = (noteIndex: number, type: 'sine' | 'square' | 'triangle' | 'sawtooth' = 'sine', reverb: number = 0.5) => {
+  public constructor(configProvider: IObservableArrayAudioPlayerConfigProvider) {
+    this._configProvider = configProvider;
+    this._audioContext = new AudioContext();
+    this._analyzer = this._audioContext.createAnalyser();
+    this._analyzer.connect(this._audioContext.destination)
+    this._analyzer.fftSize = 2048;
+  }
+
+  public get waveFormValue(): Uint8Array {
+    const bufferLength = this._analyzer.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+    this._analyzer.getByteTimeDomainData(dataArray);
+    return dataArray
+  }
+
+  public sound = (noteIndex: number, type: OscillatorType, reverb: number = 0.5) => {
     const o = this._audioContext.createOscillator()
     const g = this._audioContext.createGain()
     o.connect(g)
     o.type = type
     o.frequency.value = notes[Math.min( ...[ noteIndex, notes.length - 1 ] )]
-    g.connect(this._audioContext.destination)
+    g.connect(this._analyzer)
     g.gain.exponentialRampToValueAtTime( 0.00001, this._audioContext.currentTime + reverb)
     g.gain.value = this._configProvider.gain
     o.start(0)
     o.stop(this._audioContext.currentTime + reverb)
-  }
-
-  public constructor(configProvider: IObservableArrayAudioPlayerConfigProvider) {
-    this._configProvider = configProvider;
-    this._audioContext = new AudioContext();
   }
 }

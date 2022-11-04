@@ -1,7 +1,6 @@
 module.exports = {
   entry: './src/index.ts',
-  devtool: 'inline-source-map',
-  mode: 'development',
+  mode: 'production',
   module: {
     rules: [
       {
@@ -15,7 +14,7 @@ module.exports = {
     extensions: ['.ts']
   },
   output: {
-    path: `${__dirname}/dist`,
+    path: `${__dirname}/dist_prod`,
     filename: 'bundle.js',
   }
 };

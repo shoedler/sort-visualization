@@ -3,10 +3,11 @@
   "version": "0.0.1",
   "description": "View, and listen to different sorting algorithms",
   "scripts": {
-    "build": "webpack --watch",
-    "start": "run-p start-compile build start-run",
-    "start-compile": "tsc --watch",
-    "start-run": "browser-sync start --server -w"
+    "watch-build": "webpack --watch",
+    "watch-compile": "tsc --watch",
+    "build-prod": "webpack --config webpack.prod.js",
+    "serve": "browser-sync start --server -w",
+    "start": "run-p watch-build serve"
   },
   "devDependencies": {
     "@tweakpane/core": "^1.1.0",
