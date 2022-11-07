@@ -59,7 +59,6 @@ export const Sorters: { [key: string]: IObservableArraySorter } = {
 //   name.value = "Works!";
 // }
 
-
 (() => {
   const model = new Model();
   const audioPlayer = useObservableArrayAudioPlayer(model);

@@ -21,6 +21,12 @@ export type ObservableArrayCommand<TReturns> = {
   action: (actions: ObservableArrayContext) => Promise<TReturns>
 }
 
+export class ObservableArrayAbortError extends Error {
+  constructor() {
+    super("ObservableArrayAbortError");
+  }
+}
+
 export class ObservableArrayStats {
   public reads: number = 0;
   public writes: number = 0;
@@ -35,11 +41,12 @@ export class ObservableArrayStats {
 }
 
 export interface IObservableArraySorter {
-  sort(array: IObservableArray, signal: AbortSignal): Promise<ObservableArrayStats>;
+  sort(array: IObservableArray): Promise<ObservableArrayStats>;
 }
 
 export interface IObservableArrayConfigProvider {
   readonly delay: number;
+  readonly abortController: AbortController;
 }
 
 export interface IObservableArray {
@@ -87,6 +94,8 @@ class ObservableArray implements IObservableArray {
   // Atomic function to read from the array - this is the only way to read from it
   private read = (index: number, sound: boolean = true): number => {
     this._stats.reads++;
+    if (this._configProvider.abortController.signal.aborted)
+      throw new ObservableArrayAbortError();
     if (sound)
       this._audioPlayer.sound(index + 60, 'sine');
     return this._visualizer.getValue(index)
@@ -95,6 +104,8 @@ class ObservableArray implements IObservableArray {
   // Atomic function to write to the array - this is the only way to write to it
   private write = (index: number, value: number, sound: boolean = true): void => {
     this._stats.writes++;
+    if (this._configProvider.abortController.signal.aborted)
+      throw new ObservableArrayAbortError();
     if (sound)
       this._audioPlayer.sound(index + 40, 'sawtooth');
     this._visualizer.setValue(index, value);

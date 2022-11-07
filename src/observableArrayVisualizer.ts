@@ -79,11 +79,7 @@ class ObservableArrayVisualizer implements IObservableArrayVisualizer {
     return parseInt(this._array[index].style.height);
   }
 
-  private calcSizes = (len: number): { 
-    availableBarHeight: number,
-    availableBarWidth: number,
-    barWidth: number, 
-    barMargin: number } => {
+  private calcSizes = (len: number): { availableBarHeight: number, availableBarWidth: number, barWidth: number, barMargin: number } => {
     const width = parseFloat(getComputedStyle(this._dataContainer).width);
     const height = this._dataContainer.clientHeight;
 

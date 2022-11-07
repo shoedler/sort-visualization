@@ -20,7 +20,6 @@ class ObservableArrayController {
   private readonly _observableArray: IObservableArray;
   private readonly _visualizer: IObservableArrayVisualizer;
   private readonly _pane: Pane;
-  private _abortController: AbortController;
   private _sourceArray: number[] = [];
   private _sorterPromise: Promise<ObservableArrayStats>;
 
@@ -130,12 +129,15 @@ class ObservableArrayController {
     this._buttonCancel = controlsFolder.addButton({ 
       title: "Reset" 
     }).on("click", async () => {
-      if (this._abortController) {
-        this._abortController.abort();
-        this._buttonCancel.title = "Signaled..."
+      if (this._model.abortController) {
         this._buttonCancel.disabled = true;
+        this._model.abortController.abort();
         await this._sorterPromise
+        this._model.abortController = null;
       }
+
+      this._buttonCancel.disabled = false;
+
       this._visualizer.rebuildArray(this._sourceArray)
     });
 
@@ -282,7 +284,6 @@ class ObservableArrayController {
       this._buttonGenerate.disabled = true;
       this._buttonSort.disabled = true;
       this._listSorters.disabled = true;
-      // barSpanSlider.disabled = true;
       this._buttonDefaultParams.disabled = true;
       this._buttonCancel.title = "Cancel & Reset";
     };
@@ -292,8 +293,6 @@ class ObservableArrayController {
       this._buttonGenerate.disabled = false;
       this._buttonSort.disabled = false;
       this._listSorters.disabled = false;
-      // barSpanSlider.disabled = false;
-      this._buttonCancel.disabled = false;
       this._buttonDefaultParams.disabled = false;
       this._buttonCancel.title = "Reset";
     };
@@ -302,10 +301,20 @@ class ObservableArrayController {
       beforeSort();
       this._observableArray.stats.reset();
       const sorter = Sorters[this._model.sorterName]
-      this._abortController = new AbortController()
-      this._sorterPromise = sorter.sort(this._observableArray, this._abortController.signal)
-      await this._sorterPromise;
-      this._abortController = null;
+      this._model.abortController = new AbortController();
+
+      try {
+        // This will throw an error if the user cancels the sort
+        this._sorterPromise = sorter.sort(this._observableArray)
+      }
+      catch (e) {
+        // Ignore
+      }
+      finally {
+        await this._sorterPromise;
+        this._sorterPromise = Promise.resolve(null)
+      };
+      
       afterSort();
     });
   }

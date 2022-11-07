@@ -31,6 +31,10 @@ export class Model implements IObservableArrayConfigProvider, IObservableArrayVi
     this._currentSwaps = 0;
   };
 
+  private _abortController: AbortController;
+  public get abortController(): AbortController { return this._abortController; }
+  public set abortController(v: AbortController) { this._abortController = v; }
+
   private _sorterName: string;
   public get sorterName(): string { return this._sorterName; }
   public set sorterName(v: string) { this._sorterName = v; }
