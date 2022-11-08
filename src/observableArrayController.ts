@@ -1,14 +1,16 @@
 import { ButtonApi, InputBindingApi, ListApi, MonitorBindingApi, Pane } from "tweakpane";
+import * as TweakpaneWaveformPlugin from "tweakpane-plugin-waveform"; 
 import { Sorters } from "./index";
 import { Model } from "./model";
 import { IObservableArray, ObservableArrayStats } from "./observableArray";
+import { IObservableArrayAudioPlayer } from "./observableArrayAudioPlayer";
 import { IObservableArrayVisualizer } from "./observableArrayVisualizer";
-
 export default function useObservableArrayController(
   model: Model,
   visualizer: IObservableArrayVisualizer,
+  audioPlayer: IObservableArrayAudioPlayer,
   observableArray: IObservableArray): IObservableArrayController {
-  return new ObservableArrayController(model, visualizer, observableArray)
+  return new ObservableArrayController(model, visualizer, audioPlayer, observableArray)
 }
 
 interface IObservableArrayController {
@@ -17,8 +19,9 @@ interface IObservableArrayController {
 
 class ObservableArrayController {
   private readonly _model: Model;
-  private readonly _observableArray: IObservableArray;
   private readonly _visualizer: IObservableArrayVisualizer;
+  private readonly _audioPlayer: IObservableArrayAudioPlayer;  
+  private readonly _observableArray: IObservableArray;
   private readonly _pane: Pane;
   private _sourceArray: number[] = [];
   private _sorterPromise: Promise<ObservableArrayStats>;
@@ -40,25 +43,30 @@ class ObservableArrayController {
   private _sliderWriteColor: InputBindingApi<unknown, any>;
 
   private _sliderGain: InputBindingApi<unknown, any>;
+  private _monitorAudioWaveform : MonitorBindingApi<any>;
   
-  private _textCurrentReads: MonitorBindingApi<any>;
-  private _textCurrentWrites: MonitorBindingApi<any>;
-  private _textCurrentComparisons: MonitorBindingApi<any>;
-  private _textCurrentSwaps: MonitorBindingApi<any>;
+  private _monitorCurrentReads: MonitorBindingApi<any>;
+  private _monitorCurrentWrites: MonitorBindingApi<any>;
+  private _monitorCurrentComparisons: MonitorBindingApi<any>;
+  private _monitorCurrentSwaps: MonitorBindingApi<any>;
+  private _monitorCurrentAction: MonitorBindingApi<any>;
 
   private _buttonDefaultParams: ButtonApi;
 
   constructor(
     model: Model,
     visualizer: IObservableArrayVisualizer,
+    audioPlayer: IObservableArrayAudioPlayer,
     observableArray: IObservableArray) {
     this._model = model;
     this._visualizer = visualizer;
+    this._audioPlayer = audioPlayer;
     this._observableArray = observableArray;
     this._pane = new Pane({
       title: "Sorting Visualizer",
       container: this._visualizer.controlsContainer,
     });
+    this._pane.registerPlugin(TweakpaneWaveformPlugin)
   }
 
   public run = (): void => {
@@ -241,6 +249,14 @@ class ObservableArrayController {
       max: 0.5,
       step: 0.01,
     })
+
+    this._monitorAudioWaveform = audioParamsTab.addMonitor(this._audioPlayer, "waveFormValue", {
+      type: "waveform",
+      interval: 5,
+      style: "linear",
+      max: Math.pow(2, 8) + 10,
+      min: -10,
+    })
   }
 
   private configurePaneMonitorFolder = (): void => {
@@ -248,29 +264,36 @@ class ObservableArrayController {
         title: "Monitor",
         expanded: true,
       })
+
+      this._monitorCurrentAction = monitorFolder.addMonitor(this._observableArray.stats, 'action', {
+        label: 'action',
+        view: 'text',
+        format: (v) => v.toFixed(0),
+        interval: 10,
+      });
     
-      this._textCurrentReads = monitorFolder.addMonitor(this._observableArray.stats, 'reads', {
+      this._monitorCurrentReads = monitorFolder.addMonitor(this._observableArray.stats, 'reads', {
         label: 'reads',
         view: 'text',
         format: (v) => v.toFixed(0),
         interval: 10,
       });
     
-      this._textCurrentWrites = monitorFolder.addMonitor(this._observableArray.stats, 'writes', {
+      this._monitorCurrentWrites = monitorFolder.addMonitor(this._observableArray.stats, 'writes', {
         label: 'writes',
         view: 'text',
         format: (v) => v.toFixed(0),
         interval: 10,
       });
     
-      this._textCurrentComparisons = monitorFolder.addMonitor(this._observableArray.stats, 'comparisons', {
+      this._monitorCurrentComparisons = monitorFolder.addMonitor(this._observableArray.stats, 'comparisons', {
         label: 'comparisons',
         view: 'text',
         format: (v) => v.toFixed(0),
         interval: 10,
       });
       
-      this._textCurrentSwaps = monitorFolder.addMonitor(this._observableArray.stats, 'swaps', {
+      this._monitorCurrentSwaps = monitorFolder.addMonitor(this._observableArray.stats, 'swaps', {
         label: 'swaps',
         view: 'text',
         format: (v) => v.toFixed(0),

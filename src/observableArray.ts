@@ -28,6 +28,7 @@ export class ObservableArrayAbortError extends Error {
 }
 
 export class ObservableArrayStats {
+  public action: string = "";
   public reads: number = 0;
   public writes: number = 0;
   public comparisons: number = 0;
@@ -111,7 +112,8 @@ class ObservableArray implements IObservableArray {
     this._visualizer.setValue(index, value);
   }
   
-  public command = async <TRet>(name: string, fn: (actions: ObservableArrayContext) => Promise<TRet>): Promise<TRet> => {
+  public command = async <TRet>(description: string, fn: (actions: ObservableArrayContext) => Promise<TRet>): Promise<TRet> => {
+    this.stats.action = description;
     this._visualizer.clearStyles()
     return fn({ 
       read: this.read, 
