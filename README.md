@@ -1,4 +1,7 @@
 # Sorting Algorithms
+
+![sorter](https://user-images.githubusercontent.com/38029550/200939041-c7ec0c5d-1f68-4176-a648-a035bab9ac36.png)
+
 Listen to and view popular sorting algorithms
 
 ## Usage
