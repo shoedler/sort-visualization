@@ -1,6 +1,6 @@
 # Sorting Algorithms
 
-![sorter](https://user-images.githubusercontent.com/38029550/200939041-c7ec0c5d-1f68-4176-a648-a035bab9ac36.png)
+![sorter](https://user-images.githubusercontent.com/38029550/202434709-970d5855-e7b2-423d-b82f-a274fd0f543e.png)
 
 Listen to and view popular sorting algorithms
 
