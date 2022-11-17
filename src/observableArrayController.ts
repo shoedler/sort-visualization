@@ -34,7 +34,7 @@ class ObservableArrayController {
   private _sliderArrSize: InputBindingApi<unknown, any>;
 
   private _sliderBarSpan: InputBindingApi<unknown, any>;
-  private _sliderTransTime: InputBindingApi<unknown, any>;
+  private _selectorTransTime: InputBindingApi<unknown, any>;
   private _sliderCompareColorA: InputBindingApi<unknown, any>;
   private _sliderCompareColorB: InputBindingApi<unknown, any>;
   private _sliderReadColor: InputBindingApi<unknown, any>;
@@ -43,6 +43,9 @@ class ObservableArrayController {
   private _sliderWriteColor: InputBindingApi<unknown, any>;
 
   private _sliderGain: InputBindingApi<unknown, any>;
+  private _selectorReadSoundShape: InputBindingApi<unknown, any>;
+  private _selectorWriteSoundShape: InputBindingApi<unknown, any>;
+
   private _monitorAudioWaveform : MonitorBindingApi<any>;
   
   private _monitorCurrentReads: MonitorBindingApi<any>;
@@ -63,7 +66,6 @@ class ObservableArrayController {
     this._audioPlayer = audioPlayer;
     this._observableArray = observableArray;
     this._pane = new Pane({
-      title: "Sorting Visualizer",
       container: this._visualizer.controlsContainer,
     });
     this._pane.registerPlugin(TweakpaneWaveformPlugin)
@@ -201,11 +203,11 @@ class ObservableArrayController {
     this._sliderBarSpan = visualParamsTab.addInput(this._model, "barWidth", {
       label: "bar width",
       min: 0.1,
-      max: 1,
+      max: 0.9,
       step: 0.05
-    }).on('change', () => console.warn("Not implemented - needs to call this._visualizer.updateCssRule()"))
+    }).on('change', () => this._visualizer.updateCssBarWidthRule('barWidth'))
 
-    this._sliderTransTime = visualParamsTab.addInput(this._model, 'transitionTime', {
+    this._selectorTransTime = visualParamsTab.addInput(this._model, 'transitionTime', {
       label: 'transition time',
       options: {
         "Instant": 0,
@@ -246,10 +248,29 @@ class ObservableArrayController {
       view: 'color',
     }).on('change', () => this._visualizer.updateCssColorRule('writeColor'))
     
+
     this._sliderGain = audioParamsTab.addInput(this._model, 'gain', {
       min: 0.0,
       max: 0.5,
       step: 0.01,
+    })
+
+    this._selectorReadSoundShape = audioParamsTab.addInput(this._model, 'readSoundShape', {
+      options: {
+        "Sine": "sine",
+        "Sawtooth": "sawtooth",
+        "Square": "square",
+        "Triangle": "triangle",
+      },
+    })
+
+    this._selectorWriteSoundShape = audioParamsTab.addInput(this._model, 'writeSoundShape', {
+      options: {
+        "Sine": "sine",
+        "Sawtooth": "sawtooth",
+        "Square": "square",
+        "Triangle": "triangle",
+      },
     })
 
     this._monitorAudioWaveform = audioParamsTab.addMonitor(this._audioPlayer, "waveFormValue", {

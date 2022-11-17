@@ -18,7 +18,7 @@ const CSSRules = {
 }
 
 const Selectors = {
-  dataContainer: "data-container",
+  arrayContainer: "array-container",
   controlsContainer: "controls-container",
 }
 
@@ -44,6 +44,7 @@ export interface IObservableArrayVisualizer {
   rebuildArray(sourceArray: number[]): void;
   updateCssColorRule(rule: keyof typeof CSSColorRules & keyof IObservableArrayVisualizerConfigProvider): void;
   updateCssTimeRule(rule: keyof typeof CSSTimeRules & keyof IObservableArrayVisualizerConfigProvider): void;
+  updateCssBarWidthRule(rule: 'barWidth' & keyof IObservableArrayVisualizerConfigProvider): void
   readonly controlsContainer: HTMLElement;
 }
 
@@ -53,7 +54,7 @@ export default function useObservableArrayVisualizer(configProvider: IObservable
 
 class ObservableArrayVisualizer implements IObservableArrayVisualizer {
   private readonly _configProvider: IObservableArrayVisualizerConfigProvider;
-  private readonly _dataContainer: HTMLDivElement = document.getElementById(Selectors.dataContainer) as HTMLDivElement;
+  private readonly _arrayContainer: HTMLDivElement = document.getElementById(Selectors.arrayContainer) as HTMLDivElement;
   private readonly _controlsContainer: HTMLDivElement = document.getElementById(Selectors.controlsContainer) as HTMLDivElement;
 
   public constructor(configProvider: IObservableArrayVisualizerConfigProvider) {
@@ -64,56 +65,65 @@ class ObservableArrayVisualizer implements IObservableArrayVisualizer {
 
   public get controlsContainer(): HTMLDivElement { return this._controlsContainer }
 
+  // Helper to access array indicies, since we always have to retrieve `.children[0]`
+  private get = (index: number): HTMLDivElement => this._array[index].children[0] as HTMLDivElement
+
   public getLength(): number {
-    return this._dataContainer.children.length
+    return this._arrayContainer.children.length
   }
 
   public clearStyles(): void {
     for (let i = 0; i < this._array.length; i++) {
-      this._array[i].removeAttribute("class");
+      this.get(i).removeAttribute("class");
     }
   }
 
   public setStyle = (index: number, type: keyof typeof CSSColorRules): void => {
-    this._array[index].className = CSSColorRules[type]
+    this.get(index).className = CSSColorRules[type]
   }
 
   public setValue = (index: number, value: number): void => {
-
-    this._array[index].children[0].innerHTML = value.toString();
-    (this._array[index] as HTMLElement).style.height = `${value}%`;
+    this.get(index).children[0].innerHTML = value.toString();
+    (this.get(index) as HTMLElement).style.height = `${value}%`;
   }
 
   public getValue = (index: number): number => {
-    return parseInt(this._array[index].children[0].innerHTML);
+    return parseInt(this.get(index).children[0].innerHTML);
   }
 
   public rebuildArray = (sourceArray: number[]): void => {
-    this._dataContainer.replaceChildren(...[]);
+    this._arrayContainer.replaceChildren(...[]);
 
     for (let i = 0; i < sourceArray.length; i++) {
+      const barWrapper = document.createElement("div");
       const bar = document.createElement("div");
       const barLabel = document.createElement("label");
 
       bar.style.height = `${sourceArray[i]}%`;
       barLabel.innerHTML = sourceArray[i].toString();
 
-      bar.appendChild(barLabel);      
-      this._dataContainer.appendChild(bar);
+      bar.appendChild(barLabel);
+      barWrapper.appendChild(bar)
+      this._arrayContainer.appendChild(barWrapper);
     }
 
-    this._array = this._dataContainer.children;
+    this._array = this._arrayContainer.children;
   };
 
-  private setRootStyle = (name: string, value: string) => (document.querySelector(':root') as HTMLElement).style.setProperty('--' + name, value)
+  private setRootStyle = (rule: keyof typeof CSSRules, value: string) => (document.querySelector(':root') as HTMLElement).style.setProperty('--' + CSSRules[rule], value)
+
+  public updateCssBarWidthRule = (rule: 'barWidth' & keyof IObservableArrayVisualizerConfigProvider): void => {
+    const value = this._configProvider[rule] * 100 + '%';
+    this.setRootStyle(rule, value)
+  }
 
   public updateCssTimeRule = (rule: keyof typeof CSSTimeRules & keyof IObservableArrayVisualizerConfigProvider): void => {
     const value = this._configProvider[rule] + 's';
-    this.setRootStyle(CSSRules[rule], value)
+    this.setRootStyle(rule, value)
   }
 
   public updateCssColorRule = (rule: keyof typeof CSSColorRules & keyof IObservableArrayVisualizerConfigProvider): void => {
     const value = this._configProvider[rule];
-    this.setRootStyle(CSSRules[rule], value)
+    this.setRootStyle(rule, value)
   }
 }

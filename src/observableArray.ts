@@ -48,6 +48,8 @@ export interface IObservableArraySorter {
 export interface IObservableArrayConfigProvider {
   readonly delay: number;
   readonly abortController: AbortController;
+  readonly readSoundShape: OscillatorType;
+  readonly writeSoundShape: OscillatorType;
 }
 
 export interface IObservableArray {
@@ -98,7 +100,7 @@ class ObservableArray implements IObservableArray {
     if (this._configProvider.abortController.signal.aborted)
       throw new ObservableArrayAbortError();
     if (sound)
-      this._audioPlayer.sound(index + 60, 'sine');
+      this._audioPlayer.sound(index + 60, this._configProvider.readSoundShape);
     return this._visualizer.getValue(index)
   }
 
@@ -108,7 +110,7 @@ class ObservableArray implements IObservableArray {
     if (this._configProvider.abortController.signal.aborted)
       throw new ObservableArrayAbortError();
     if (sound)
-      this._audioPlayer.sound(index + 40, 'sawtooth');
+      this._audioPlayer.sound(index + 40, this._configProvider.writeSoundShape);
     this._visualizer.setValue(index, value);
   }
   
@@ -131,7 +133,6 @@ class ObservableArray implements IObservableArray {
       this._visualizer.setStyle(index2, "compareColorB")
       const value2 = actions.read(index2);
       await this.pause(this._configProvider.delay / 2); 
-
       return CompareOperations[op](value1, value2)
     })
   }

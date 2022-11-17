@@ -24,6 +24,8 @@ export class Model implements IObservableArrayConfigProvider, IObservableArrayVi
     this._writeColor = "#67ca6b";
 
     this._gain = 0.2;
+    this._readSoundShape = 'sine';
+    this._writeSoundShape = 'sawtooth';
 
     this._currentReads = 0;
     this._currentWrites = 0;
@@ -84,6 +86,14 @@ export class Model implements IObservableArrayConfigProvider, IObservableArrayVi
   private _gain: number;
   public get gain(): number { return this._gain; }
   public set gain(v: number) { this._gain = v; }
+
+  private _readSoundShape: OscillatorType;
+  public get readSoundShape(): OscillatorType { return this._readSoundShape; }
+  public set readSoundShape(v: OscillatorType) { this._readSoundShape = v; }
+
+  private _writeSoundShape: OscillatorType;
+  public get writeSoundShape(): OscillatorType { return this._writeSoundShape; }
+  public set writeSoundShape(v: OscillatorType) { this._writeSoundShape = v; }
 
 
   private _currentReads: number;

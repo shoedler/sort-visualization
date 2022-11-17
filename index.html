@@ -15,21 +15,24 @@
   <body>
     <script> var exports = {}; </script>
 
-    <div class="text">
-      <h2 onclick="window.open('https:\/\/www.github.com\/shoedler')">shoedler/</h2>
-      <h1 onclick="window.open('https:\/\/www.github.com\/shoedler\/app-sort-visualization')">app-sorting-visualization</h1>
-      <p>View, and listen to different sorting algorithms</p>
-    </div>
+    <div class="wrapper">
+      <class class="wrapper-data">
+        <div class="text">
+          <h2 onclick="window.open('https:\/\/www.github.com\/shoedler')">shoedler/</h2>
+          <h1 onclick="window.open('https:\/\/www.github.com\/shoedler\/app-sort-visualization')">app-sorting-visualization</h1>
+          <p>View, and listen to different sorting algorithms</p>
+        </div>
+        <div id="array-container">
+          <!-- [Computed] Array -->
+        </div> 
+      </class>
 
-    <div id="wrapper">
-      <div id="data-container">
-        <!-- [Computed] Array -->
-      </div> 
-      <div id="controls-container">
-        <!-- [Computed] Tweakpane -->
+      <div class="wrapper-controls">
+        <div id="controls-container">
+          <!-- [Computed] Tweakpane -->
+        </div>
       </div>
     </div>
-
 
     <script defer type="application/javascript" src="dist/bundle.js"></script>
   </body>

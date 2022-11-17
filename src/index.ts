@@ -60,11 +60,13 @@ export const Sorters: { [key: string]: IObservableArraySorter } = {
 // }
 
 (() => {
-  const model = new Model();
-  const audioPlayer = useObservableArrayAudioPlayer(model);
-  const visualizer = useObservableArrayVisualizer(model);
-  const array = useObservableArray(model, visualizer, audioPlayer);
-  const controller = useObservableArrayController(model, visualizer, audioPlayer, array) 
-
-  controller.run();
+  document.addEventListener("DOMContentLoaded", _ => {
+    const model = new Model();
+    const audioPlayer = useObservableArrayAudioPlayer(model);
+    const visualizer = useObservableArrayVisualizer(model);
+    const array = useObservableArray(model, visualizer, audioPlayer);
+    const controller = useObservableArrayController(model, visualizer, audioPlayer, array) 
+  
+    controller.run();
+  })
 })()
