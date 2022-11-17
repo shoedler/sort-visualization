@@ -14,7 +14,7 @@ export class Model implements IObservableArrayConfigProvider, IObservableArrayVi
     this._delay = 300;
     this._sourceArraySize = 30;
 
-    this._barSpanFactor = 0.5;
+    this._barWidth = 0.5;
     this._transitionTime = 0.1;
     this._compareColorA = "#ff5346";
     this._compareColorB = "#ff954e";
@@ -48,9 +48,9 @@ export class Model implements IObservableArrayConfigProvider, IObservableArrayVi
   public set sourceArraySize(v: number) { this._sourceArraySize = v; }
 
 
-  private _barSpanFactor: number;
-  public get barSpanFactor(): number { return this._barSpanFactor; }
-  public set barSpanFactor(v: number) { this._barSpanFactor = v; }
+  private _barWidth: number;
+  public get barWidth(): number { return this._barWidth; }
+  public set barWidth(v: number) { this._barWidth = v; }
 
   private _transitionTime: number;
   public get transitionTime(): number { return this._transitionTime; }

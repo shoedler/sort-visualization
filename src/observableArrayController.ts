@@ -88,7 +88,6 @@ class ObservableArrayController {
   }
 
   private configureGlobalEventListeners = (): void => {
-    window.addEventListener("resize", () => this._visualizer.redrawArray());
     window.addEventListener("load", () => setTimeout(() => this._visualizer.rebuildArray(this._sourceArray), 500));
   }
 
@@ -199,50 +198,53 @@ class ObservableArrayController {
     const visualParamsTab = visualAndAudioParamsTab.pages[0];
     const audioParamsTab = visualAndAudioParamsTab.pages[1];
 
-    this._sliderBarSpan = visualParamsTab.addInput(this._model, "barSpanFactor", {
+    this._sliderBarSpan = visualParamsTab.addInput(this._model, "barWidth", {
       label: "bar width",
       min: 0.1,
       max: 1,
       step: 0.05
-    }).on('change', () => this._visualizer.redrawArray())
+    }).on('change', () => console.warn("Not implemented - needs to call this._visualizer.updateCssRule()"))
 
     this._sliderTransTime = visualParamsTab.addInput(this._model, 'transitionTime', {
       label: 'transition time',
-      min: 0,
-      max: 0.3,
-      step: 0.01,
-      value: 0.1
-    }).on('change', () => this._visualizer.updateCssRule('transitionTime'))
+      options: {
+        "Instant": 0,
+        "Fast": 0.1,
+        "Medium": 0.3,
+        "Slow": 0.7,
+        "🦥": 1.2
+      },
+    }).on('change', () => this._visualizer.updateCssTimeRule('transitionTime'))
 
     this._sliderCompareColorA = visualParamsTab.addInput(this._model, 'compareColorA', {
       label: 'compare a',
       view: 'color',
-    }).on('change', () => this._visualizer.updateCssRule('compareColorA'))
+    }).on('change', () => this._visualizer.updateCssColorRule('compareColorA'))
     
     this._sliderCompareColorB = visualParamsTab.addInput(this._model, 'compareColorB', {
       label: 'compare b',
       view: 'color',
-    }).on('change', () => this._visualizer.updateCssRule('compareColorB'))
+    }).on('change', () => this._visualizer.updateCssColorRule('compareColorB'))
 
     this._sliderReadColor = visualParamsTab.addInput(this._model, 'readColor', {
       label: 'read',
       view: 'color',
-    }).on('change', () => this._visualizer.updateCssRule('readColor'))
+    }).on('change', () => this._visualizer.updateCssColorRule('readColor'))
 
     this._sliderSwapColorA = visualParamsTab.addInput(this._model, 'swapColorA', {
       label: 'swap a',
       view: 'color',
-    }).on('change', () => this._visualizer.updateCssRule('swapColorA'))
+    }).on('change', () => this._visualizer.updateCssColorRule('swapColorA'))
 
     this._sliderSwapColorB = visualParamsTab.addInput(this._model, 'swapColorB', {
       label: 'swap b',
       view: 'color',
-    }).on('change', () => this._visualizer.updateCssRule('swapColorB'))
+    }).on('change', () => this._visualizer.updateCssColorRule('swapColorB'))
 
     this._sliderWriteColor = visualParamsTab.addInput(this._model, 'writeColor', {
       label: 'write',
       view: 'color',
-    }).on('change', () => this._visualizer.updateCssRule('writeColor'))
+    }).on('change', () => this._visualizer.updateCssColorRule('writeColor'))
     
     this._sliderGain = audioParamsTab.addInput(this._model, 'gain', {
       min: 0.0,
@@ -253,9 +255,8 @@ class ObservableArrayController {
     this._monitorAudioWaveform = audioParamsTab.addMonitor(this._audioPlayer, "waveFormValue", {
       type: "waveform",
       interval: 5,
-      style: "linear",
-      max: Math.pow(2, 8) + 10,
-      min: -10,
+      max: Math.pow(2, 8),
+      min: 0,
     })
   }
 
