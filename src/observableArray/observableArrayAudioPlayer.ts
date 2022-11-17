@@ -24,12 +24,11 @@ export interface IObservableArrayAudioPlayerConfigProvider {
 }
 
 export interface IObservableArrayAudioPlayer {
-  sound(noteIndex: number, type: OscillatorType, reverb?: number): void
   readonly waveFormValue: Uint8Array;
+  sound(noteIndex: number, type: OscillatorType, reverb?: number): void
 }
 
-
-export default function useObservableArrayAudioPlayer(configProvider: IObservableArrayAudioPlayerConfigProvider): IObservableArrayAudioPlayer { 
+export default function createObservableArrayAudioPlayer(configProvider: IObservableArrayAudioPlayerConfigProvider): IObservableArrayAudioPlayer { 
   return new ObservableArrayAudioPlayer(configProvider)
 }
 

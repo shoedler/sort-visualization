@@ -1,9 +1,7 @@
-import { IObservableArrayConfigProvider } from "./observableArray";
-import { IObservableArrayVisualizerConfigProvider } from "./observableArrayVisualizer";
 import { Sorters } from "./index";
-import { IObservableArrayAudioPlayerConfigProvider } from "./observableArrayAudioPlayer";
-import { DOMSelectors } from "./constants";
-
+import { IObservableArrayConfigProvider } from "./observableArray/observableArrayDriver";
+import { IObservableArrayVisualizerConfigProvider } from "./observableArray/observableArrayVisualizer";
+import { IObservableArrayAudioPlayerConfigProvider } from "./observableArray/observableArrayAudioPlayer";
 
 export class Model implements IObservableArrayConfigProvider, IObservableArrayVisualizerConfigProvider, IObservableArrayAudioPlayerConfigProvider {
   public constructor() {
@@ -32,9 +30,7 @@ export class Model implements IObservableArrayConfigProvider, IObservableArrayVi
     this._currentWrites = 0;
     this._currentComparisons = 0;
     this._currentSwaps = 0;
-  };
-
-  public get arrayContainerId(): string { return DOMSelectors.arrayContainer; }
+  }
 
   private _abortController: AbortController;
   public get abortController(): AbortController { return this._abortController; }

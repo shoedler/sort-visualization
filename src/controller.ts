@@ -3,18 +3,14 @@ import * as TweakpaneWaveformPlugin from "tweakpane-plugin-waveform";
 import { LocalStorageKeys } from "./constants";
 import { Sorters } from "./index";
 import { Model } from "./model";
-import { IObservableArray, ObservableArrayStats } from "./observableArray";
-import { IObservableArrayAudioPlayer } from "./observableArrayAudioPlayer";
-import { IObservableArrayVisualizer } from "./observableArrayVisualizer";
+import { ObservableArrayDriver, ObservableArrayStats } from "./observableArray/observableArrayDriver";
 import { IViewService } from "./viewService";
 
 export default function useController(
   model: Model,
   viewService: IViewService,
-  visualizer: IObservableArrayVisualizer,
-  audioPlayer: IObservableArrayAudioPlayer,
-  observableArray: IObservableArray): IController {
-  return new Controller(model, viewService, visualizer, audioPlayer, observableArray)
+  observableArray: ObservableArrayDriver): IController {
+  return new Controller(model, viewService,  observableArray)
 }
 
 interface IController {
@@ -24,9 +20,7 @@ interface IController {
 class Controller {
   private readonly _model: Model;
   private readonly _viewService: IViewService;
-  private readonly _visualizer: IObservableArrayVisualizer;
-  private readonly _audioPlayer: IObservableArrayAudioPlayer;  
-  private readonly _observableArray: IObservableArray;
+  private readonly _observableArray: ObservableArrayDriver;
   private readonly _pane: Pane;
   private _sourceArray: number[] = [];
   private _sorterPromise: Promise<ObservableArrayStats>;
@@ -64,13 +58,9 @@ class Controller {
   constructor(
     model: Model,
     viewService: IViewService,
-    visualizer: IObservableArrayVisualizer,
-    audioPlayer: IObservableArrayAudioPlayer,
-    observableArray: IObservableArray) {
+    observableArray: ObservableArrayDriver) {
     this._model = model;
     this._viewService = viewService;
-    this._visualizer = visualizer;
-    this._audioPlayer = audioPlayer;
     this._observableArray = observableArray;
     this._pane = new Pane({
       container: this._viewService.controlsContainer,
@@ -97,7 +87,7 @@ class Controller {
   }
 
   private configureGlobalEventListeners = (): void => {
-    window.addEventListener("load", () => setTimeout(() => this._visualizer.rebuildArray(this._sourceArray), 500));
+    window.addEventListener("load", () => setTimeout(() => this._observableArray.visualizer.rebuildArray(this._sourceArray), 500));
   }
 
   private randomArrayValue = (): number => Math.floor(Math.random() * 100) + 1
@@ -133,7 +123,7 @@ class Controller {
       title: "Generate New Array" 
     }).on("click", () => { 
       this.generateArray()
-      this._visualizer.rebuildArray(this._sourceArray)
+      this._observableArray.visualizer.rebuildArray(this._sourceArray)
     });
   
     this._buttonSort = controlsFolder.addButton({ 
@@ -154,7 +144,7 @@ class Controller {
 
       this._buttonCancel.disabled = false;
 
-      this._visualizer.rebuildArray(this._sourceArray)
+      this._observableArray.visualizer.rebuildArray(this._sourceArray)
     });
 
     // (this._buttonCancel.element.children.item(1).children.item(0).children.item(0) as HTMLElement).style.backgroundColor = "var(--color-pink)";
@@ -192,7 +182,7 @@ class Controller {
       step: 1,
     }).on('change', ev => {
       this.reshapeArray();
-      this._visualizer.rebuildArray(this._sourceArray)
+      this._observableArray.visualizer.rebuildArray(this._sourceArray)
     })
   }
 
@@ -280,7 +270,7 @@ class Controller {
       },
     })
 
-    this._monitorAudioWaveform = audioParamsTab.addMonitor(this._audioPlayer, "waveFormValue", {
+    this._monitorAudioWaveform = audioParamsTab.addMonitor(this._observableArray.audioPlayer, "waveFormValue", {
       type: "waveform",
       interval: 5,
       max: Math.pow(2, 8),

@@ -1,7 +1,7 @@
-import { CSSClassNames, CSSColorRules } from "./constants";
+import { CSSClassNames, CSSColorRules, DOMSelectors } from "../constants";
 
 export interface IObservableArrayVisualizerConfigProvider {
-  readonly arrayContainerId: string;
+
 }
 
 export interface IObservableArrayVisualizer {
@@ -14,7 +14,7 @@ export interface IObservableArrayVisualizer {
   rebuildArray(sourceArray: number[]): void;
 }
 
-export default function useObservableArrayVisualizer(configProvider: IObservableArrayVisualizerConfigProvider) {
+export default function createObservableArrayVisualizer(configProvider: IObservableArrayVisualizerConfigProvider) {
   return new ObservableArrayVisualizer(configProvider);
 }
 
@@ -28,10 +28,8 @@ class ObservableArrayVisualizer implements IObservableArrayVisualizer {
     this._arrayContainer = document.createElement("div");
     this._arrayContainer.className = CSSClassNames.arrayContainer
 
-    document.getElementById(this._configProvider.arrayContainerId)
-      .append(this._arrayContainer);
+    document.getElementById(DOMSelectors.arrayContainer).append(this._arrayContainer);
   }
-
   private _array: HTMLCollection;
 
   public get controlsContainer(): HTMLDivElement { return this._controlsContainer }

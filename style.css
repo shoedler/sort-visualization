@@ -110,7 +110,7 @@ body {
   margin-top: 7vh; /* Should be 2.5vw, but the labels are outside of .observable-array */
 
   position: relative;
-  height: 50vh;
+  height: 40vh;
   width: 65vw;
 }
 @media (max-width: 800px) {
@@ -150,7 +150,7 @@ body {
   transition: var(--transition-time) all ease;
 }
 
-/* Bar Label*/
+/* Bar Label */
 .observable-array > div > div > label {
   position: absolute;
   transform: 

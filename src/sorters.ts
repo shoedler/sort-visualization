@@ -1,4 +1,4 @@
-import { IObservableArray, IObservableArraySorter, ObservableArrayAbortError, ObservableArrayStats } from "./observableArray";
+import { IObservableArray, IObservableArraySorter, ObservableArrayAbortError, ObservableArrayStats } from "./observableArray/observableArrayDriver";
 
 abstract class ObservableArraySorterBase implements IObservableArraySorter {
   protected abstract _sort(array: IObservableArray): Promise<ObservableArrayStats>;
@@ -96,9 +96,9 @@ export class ObservableQuickSort extends ObservableArraySorterBase {
 
     const xor = (a: boolean, b: boolean) => (a || b) && !(a && b);
 
-    if (xor((a > b), (a > c))) // TODO: (classification) arn't these comparisons?
+    if (xor((a > b), (a > c))) // TODO: (classification) aren't these comparisons?
       return low;
-    else if (xor((b < a), (b < c))) // TODO: (classification) arn't these comparisons?
+    else if (xor((b < a), (b < c))) // TODO: (classification) aren't these comparisons?
       return mid;
     else
       return high;
