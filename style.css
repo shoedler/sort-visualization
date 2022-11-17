@@ -100,21 +100,21 @@ body {
 .wrapper-controls {
 }
 
-#array-container {
+.observable-array {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: flex-end;
   align-content: stretch;
 
-  margin-top: 7vh; /* Should be 2.5vw, but the labels are outside of #array-container */
+  margin-top: 7vh; /* Should be 2.5vw, but the labels are outside of .observable-array */
 
   position: relative;
   height: 50vh;
   width: 65vw;
 }
 @media (max-width: 800px) {
-  #array-container {
+  .observable-array {
     width: 95vw;
   }
 }
@@ -130,7 +130,7 @@ body {
 }
 
 /* Bar Wrapper */
-#array-container > div {
+.observable-array > div {
   flex-grow: 1;
   flex-shrink: 0;
 
@@ -140,7 +140,7 @@ body {
 }
 
 /* Bar */
-#array-container > div > div {
+.observable-array > div > div {
   width: var(--bar-width);
   margin-left: auto;
   margin-right: auto;
@@ -151,7 +151,7 @@ body {
 }
 
 /* Bar Label*/
-#array-container > div > div > label {
+.observable-array > div > div > label {
   position: absolute;
   transform: 
     rotate(-90deg)

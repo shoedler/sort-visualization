@@ -1,7 +1,7 @@
 import { Model } from "./model";
 import useObservableArray, { IObservableArraySorter } from "./observableArray";
 import useObservableArrayAudioPlayer from "./observableArrayAudioPlayer";
-import useObservableArrayController from "./observableArrayController";
+import useController from "./controller";
 import useObservableArrayVisualizer from "./observableArrayVisualizer";
 import {
   ObservableBubbleSort,
@@ -14,6 +14,7 @@ import {
   ObservableRadixSort,
   ObservableSelectionSort,
   ObservableShellSort } from "./sorters";
+import useViewService from "./viewService";
 
 export const Sorters: { [key: string]: IObservableArraySorter } = {
   "Bubble": new ObservableBubbleSort(),
@@ -64,10 +65,11 @@ export const Sorters: { [key: string]: IObservableArraySorter } = {
 (() => {
   document.addEventListener("DOMContentLoaded", _ => {
     const model = new Model();
+    const viewService = useViewService(model);
     const audioPlayer = useObservableArrayAudioPlayer(model);
     const visualizer = useObservableArrayVisualizer(model);
     const array = useObservableArray(model, visualizer, audioPlayer);
-    const controller = useObservableArrayController(model, visualizer, audioPlayer, array) 
+    const controller = useController(model, viewService, visualizer, audioPlayer, array) 
   
     controller.run();
   })

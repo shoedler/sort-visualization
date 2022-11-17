@@ -1,24 +1,29 @@
 import { ButtonApi, InputBindingApi, ListApi, MonitorBindingApi, Pane } from "tweakpane";
 import * as TweakpaneWaveformPlugin from "tweakpane-plugin-waveform"; 
+import { LocalStorageKeys } from "./constants";
 import { Sorters } from "./index";
 import { Model } from "./model";
 import { IObservableArray, ObservableArrayStats } from "./observableArray";
 import { IObservableArrayAudioPlayer } from "./observableArrayAudioPlayer";
 import { IObservableArrayVisualizer } from "./observableArrayVisualizer";
-export default function useObservableArrayController(
+import { IViewService } from "./viewService";
+
+export default function useController(
   model: Model,
+  viewService: IViewService,
   visualizer: IObservableArrayVisualizer,
   audioPlayer: IObservableArrayAudioPlayer,
-  observableArray: IObservableArray): IObservableArrayController {
-  return new ObservableArrayController(model, visualizer, audioPlayer, observableArray)
+  observableArray: IObservableArray): IController {
+  return new Controller(model, viewService, visualizer, audioPlayer, observableArray)
 }
 
-interface IObservableArrayController {
+interface IController {
   run(): void
 }
 
-class ObservableArrayController {
+class Controller {
   private readonly _model: Model;
+  private readonly _viewService: IViewService;
   private readonly _visualizer: IObservableArrayVisualizer;
   private readonly _audioPlayer: IObservableArrayAudioPlayer;  
   private readonly _observableArray: IObservableArray;
@@ -58,15 +63,17 @@ class ObservableArrayController {
 
   constructor(
     model: Model,
+    viewService: IViewService,
     visualizer: IObservableArrayVisualizer,
     audioPlayer: IObservableArrayAudioPlayer,
     observableArray: IObservableArray) {
     this._model = model;
+    this._viewService = viewService;
     this._visualizer = visualizer;
     this._audioPlayer = audioPlayer;
     this._observableArray = observableArray;
     this._pane = new Pane({
-      container: this._visualizer.controlsContainer,
+      container: this._viewService.controlsContainer,
     });
     this._pane.registerPlugin(TweakpaneWaveformPlugin)
   }
@@ -82,7 +89,7 @@ class ObservableArrayController {
       title: "Restore",
       label: "default values"
     }).on("click", () => { 
-      localStorage.removeItem('preset');
+      localStorage.removeItem(LocalStorageKeys.tweakpanePreset);
       window.location.reload();
     });
 
@@ -205,7 +212,7 @@ class ObservableArrayController {
       min: 0.1,
       max: 0.9,
       step: 0.05
-    }).on('change', () => this._visualizer.updateCssBarWidthRule('barWidth'))
+    }).on('change', () => this._viewService.updateCssBarWidthRule('barWidth'))
 
     this._selectorTransTime = visualParamsTab.addInput(this._model, 'transitionTime', {
       label: 'transition time',
@@ -216,37 +223,37 @@ class ObservableArrayController {
         "Slow": 0.7,
         "🦥": 1.2
       },
-    }).on('change', () => this._visualizer.updateCssTimeRule('transitionTime'))
+    }).on('change', () => this._viewService.updateCssTimeRule('transitionTime'))
 
     this._sliderCompareColorA = visualParamsTab.addInput(this._model, 'compareColorA', {
       label: 'compare a',
       view: 'color',
-    }).on('change', () => this._visualizer.updateCssColorRule('compareColorA'))
+    }).on('change', () => this._viewService.updateCssColorRule('compareColorA'))
     
     this._sliderCompareColorB = visualParamsTab.addInput(this._model, 'compareColorB', {
       label: 'compare b',
       view: 'color',
-    }).on('change', () => this._visualizer.updateCssColorRule('compareColorB'))
+    }).on('change', () => this._viewService.updateCssColorRule('compareColorB'))
 
     this._sliderReadColor = visualParamsTab.addInput(this._model, 'readColor', {
       label: 'read',
       view: 'color',
-    }).on('change', () => this._visualizer.updateCssColorRule('readColor'))
+    }).on('change', () => this._viewService.updateCssColorRule('readColor'))
 
     this._sliderSwapColorA = visualParamsTab.addInput(this._model, 'swapColorA', {
       label: 'swap a',
       view: 'color',
-    }).on('change', () => this._visualizer.updateCssColorRule('swapColorA'))
+    }).on('change', () => this._viewService.updateCssColorRule('swapColorA'))
 
     this._sliderSwapColorB = visualParamsTab.addInput(this._model, 'swapColorB', {
       label: 'swap b',
       view: 'color',
-    }).on('change', () => this._visualizer.updateCssColorRule('swapColorB'))
+    }).on('change', () => this._viewService.updateCssColorRule('swapColorB'))
 
     this._sliderWriteColor = visualParamsTab.addInput(this._model, 'writeColor', {
       label: 'write',
       view: 'color',
-    }).on('change', () => this._visualizer.updateCssColorRule('writeColor'))
+    }).on('change', () => this._viewService.updateCssColorRule('writeColor'))
     
 
     this._sliderGain = audioParamsTab.addInput(this._model, 'gain', {
@@ -372,11 +379,11 @@ class ObservableArrayController {
       }
       timeout = setTimeout(() => {
         const preset = this._pane.exportPreset();
-        localStorage.setItem('preset', JSON.stringify(preset));
+        localStorage.setItem(LocalStorageKeys.tweakpanePreset, JSON.stringify(preset));
       }, 1000);
     });
   
-    const preset = localStorage.getItem('preset');
+    const preset = localStorage.getItem(LocalStorageKeys.tweakpanePreset);
     if (preset) {
       this._pane.importPreset(JSON.parse(preset));
     }
