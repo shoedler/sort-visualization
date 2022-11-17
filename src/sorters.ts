@@ -267,3 +267,45 @@ export class ObservableMergeSort extends ObservableArraySorterBase {
     }
   }
 }
+
+export class ObservablePigeonholeSort extends ObservableArraySorterBase {
+  protected _sort = async (array: IObservableArray): Promise<ObservableArrayStats> => {
+    const min = await this.getMin(array);
+    const max = await this.getMax(array);
+    const range = max - min + 1;
+
+    const holes = new Array(range).fill(0);
+
+    for (let i = 0; i < array.length; i++) {
+      holes[await array.get(i) - min]++;
+    }
+
+    let i = 0;
+    for (let count = 0; count < range; count++) {
+      while (holes[count]-- > 0) {
+        await array.set(i++, count + min);
+      }
+    }
+    return array.stats;
+  }
+
+  private getMin = async (array: IObservableArray): Promise<number> => {
+    let min = await array.get(0);
+    for (let i = 1; i < array.length; i++) {
+      if (await array.compareWithVal(i, '<', min)) {
+        min = await array.get(i);
+      }
+    }
+    return min;
+  }
+
+  private getMax = async (array: IObservableArray): Promise<number> => {
+    let max = await array.get(0);
+    for (let i = 1; i < array.length; i++) {
+      if (await array.compareWithVal(i, '>', max)) {
+        max = await array.get(i);
+      }
+    }
+    return max;
+  }
+}

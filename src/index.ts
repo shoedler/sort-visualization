@@ -3,27 +3,29 @@ import useObservableArray, { IObservableArraySorter } from "./observableArray";
 import useObservableArrayAudioPlayer from "./observableArrayAudioPlayer";
 import useObservableArrayController from "./observableArrayController";
 import useObservableArrayVisualizer from "./observableArrayVisualizer";
-import { 
+import {
   ObservableBubbleSort,
   ObservableCombSort,
   ObservableHeapSort,
   ObservableInsertionSort,
   ObservableMergeSort,
+  ObservablePigeonholeSort,
   ObservableQuickSort,
   ObservableRadixSort,
   ObservableSelectionSort,
   ObservableShellSort } from "./sorters";
 
 export const Sorters: { [key: string]: IObservableArraySorter } = {
-  "Bubble Sort": new ObservableBubbleSort(),
-  "Merge Sort": new ObservableMergeSort(),
-  "Insertion Sort": new ObservableInsertionSort(),
-  "Selection Sort": new ObservableSelectionSort(),
-  "Quick Sort": new ObservableQuickSort(),
-  "Heap Sort": new ObservableHeapSort(),
-  "Radix Sort": new ObservableRadixSort(),
-  "Shell Sort": new ObservableShellSort(),
-  "Comb Sort": new ObservableCombSort(),
+  "Bubble": new ObservableBubbleSort(),
+  "Pigeonhole": new ObservablePigeonholeSort(),
+  "Merge": new ObservableMergeSort(),
+  "Insertion": new ObservableInsertionSort(),
+  "Selection": new ObservableSelectionSort(),
+  "Quick": new ObservableQuickSort(),
+  "Heap": new ObservableHeapSort(),
+  "Radix": new ObservableRadixSort(),
+  "Shell": new ObservableShellSort(),
+  "Comb": new ObservableCombSort(),
 };
 
 // class Observable<T> {
