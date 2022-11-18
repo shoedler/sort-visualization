@@ -1,7 +1,5 @@
 import { IObservableArray } from "./observableArray/observableArrayDriver";
-import { ObservableArraySorterBase } from "./observableArray/observableArraySorterBase";
-
-export type Lookup = { [key: string]: number | string | boolean | number[] };
+import { Lookup, ObservableArraySorterBase } from "./observableArray/observableArraySorterBase";
 
 export class ObservableBubbleSort extends ObservableArraySorterBase {
   protected _sort = async (array: IObservableArray, vars: Lookup): Promise<void> => {
@@ -42,9 +40,11 @@ export class ObservableSelectionSort extends ObservableArraySorterBase {
           vars.minIndex = vars.j;
         }
       }
+      delete vars.j;
       await array.swap(vars.i, vars.minIndex);
       delete vars.minIndex;
     }
+    delete vars.i;
   }
 }
 
@@ -88,7 +88,6 @@ export class ObservableQuickSort extends ObservableArraySorterBase {
 		vars.lowValue = await array.get(low);
 		vars.midValue = await array.get(vars.midIndex);
 		vars.highValue = await array.get(high);
-
 
     const xor = (a: boolean, b: boolean) => (a || b) && !(a && b);
 
@@ -181,18 +180,22 @@ export class ObservableRadixSort extends ObservableArraySorterBase { // TODO: Co
   }
 }
 
-export class ObservableShellSort extends ObservableArraySorterBase { // TODO: Convert to use observable vars
-  protected _sort = async (array: IObservableArray): Promise<void> => {
-    for (let gap = Math.floor(array.length / 2); gap > 0; gap = Math.floor(gap / 2)) {
-      for (let i = gap; i < array.length; i++) {
-        let temp = await array.get(i);
-        let j;
-        for (j = i; j >= gap && await array.compareWithVal(j - gap, '>', temp); j -= gap) {
-          await array.set(j, await array.get(j - gap));
+export class ObservableShellSort extends ObservableArraySorterBase {
+  protected _sort = async (array: IObservableArray, vars: Lookup): Promise<void> => {
+    for (vars.gap = Math.floor(array.length / 2); vars.gap > 0; vars.gap = Math.floor(vars.gap / 2)) {
+      for (vars.i = vars.gap; vars.i < array.length; vars.i++) {
+        vars.temp = await array.get(vars.i);
+        vars.j = vars.i;
+        for ( ; vars.j >= vars.gap && await array.compareWithVal(vars.j - vars.gap, '>', vars.temp); vars.j -= vars.gap) {
+          await array.set(vars.j, await array.get(vars.j - vars.gap));
         }
-        await array.set(j, temp);
+        await array.set(vars.j, vars.temp);
+        delete vars.j;
+        delete vars.temp;
       }
+      delete vars.i;
     }
+    delete vars.gap;
   }
 }
 

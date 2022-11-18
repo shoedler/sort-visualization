@@ -1,6 +1,7 @@
 import { IObservableArray, IObservableArraySorter, ObservableArrayAbortError } from "./observableArrayDriver";
-import { Lookup } from "../sorters";
 import { DOMSelectors } from "../constants";
+
+export type Lookup = { [key: string]: number | string | boolean | number[] };
 
 export abstract class ObservableArraySorterBase implements IObservableArraySorter {
   private createValue = (value: Lookup[keyof Lookup]): HTMLSpanElement[] => {

@@ -170,8 +170,8 @@ class Controller {
   
     this._sliderDelay = simParamsFolder.addInput(this._model, "delay", {
       min: 0,
-      max: 500,
-      step: 5,
+      max: 1000,
+      step: 10,
       value: 30,
     })
   
