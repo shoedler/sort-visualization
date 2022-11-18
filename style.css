@@ -1,4 +1,7 @@
 :root {
+  --mobile-width: 95vw;
+  --desktop-width: 65vw;
+
   --color-pink: #e91e63;
   --color-red: #f44034;
   --color-yellow: #ffeb3b;
@@ -6,6 +9,7 @@
   --color-green: #4caf50;
   --color-blue: #18beff;
   --color-turquoise: #00bcd4;
+  --color-gray: #5a5a5a;
 
   --bg-color: hsl(230deg 5% 9%);
   --fg-color: #efefef;
@@ -100,22 +104,22 @@ body {
 .wrapper-controls {
 }
 
-.observable-array {
+#array-container {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: flex-end;
   align-content: stretch;
 
-  margin-top: 7vh; /* Should be 2.5vw, but the labels are outside of .observable-array */
+  margin-top: 7vh; /* Should be 2.5vw, but the labels are outside of #array-container */
 
   position: relative;
   height: 40vh;
-  width: 65vw;
+  width: var(--desktop-width);
 }
 @media (max-width: 800px) {
-  .observable-array {
-    width: 95vw;
+  #array-container {
+    width: var(--mobile-width);
   }
 }
 
@@ -125,12 +129,12 @@ body {
 @media (max-width: 800px) {
   #controls-container {
     margin-top: 2.5vw;
-    width: 95vw;
+    width: var(--mobile-width);
   }
 }
 
 /* Bar Wrapper */
-.observable-array > div {
+#array-container > div {
   flex-grow: 1;
   flex-shrink: 0;
 
@@ -140,7 +144,7 @@ body {
 }
 
 /* Bar */
-.observable-array > div > div {
+#array-container > div > div {
   width: var(--bar-width);
   margin-left: auto;
   margin-right: auto;
@@ -151,7 +155,7 @@ body {
 }
 
 /* Bar Label */
-.observable-array > div > div > label {
+#array-container > div > div > label {
   position: absolute;
   transform: 
     rotate(-90deg)
@@ -160,4 +164,58 @@ body {
   color: var(--fg-color);
   font-family: Fira Sans, sans-serif;
   font-size: var(--bar-label-font-size);
+}
+
+#array-vars {
+  width: var(--desktop-width);
+  background-color: #28292e;
+  border-radius: 5px;
+  margin-top: 2.5vh;
+}
+@media (max-width: 800px) {
+  #array-vars {
+    width: var(--mobile-width);
+  }
+}
+
+#array-vars > div {
+  color: var(--fg-color);
+  padding-top: 1vh;
+  padding-left: 1vh;
+  padding-right: 1vh;
+}
+#array-vars > div:last-child {
+  color: var(--fg-color);
+  padding-top: 1vh;
+  padding-bottom: 1vh;
+}
+
+.code {
+  font-family: Fira Code, sans-serif;
+  font-size: 15px;
+  margin: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-weight: 500;
+}
+
+/* TODO: Move these colors to vars */
+.code > .var-keyword {
+  color: #2262b2;
+  font-style: italic;
+}
+.code > .var-name {
+  color: #54b6ef;
+}
+.code > .numeric-literal {
+  color: #bc764c;
+}
+.code > .string-literal {
+  color: #549c54;
+}
+.code > .punctuation {
+  color: #c4c4c4;
+}
+.code > .punctuation-bracket {
+  color: #999999;
 }

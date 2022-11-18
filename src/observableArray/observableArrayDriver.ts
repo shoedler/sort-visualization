@@ -42,7 +42,7 @@ export class ObservableArrayStats {
 }
 
 export interface IObservableArraySorter {
-  sort(array: IObservableArray): Promise<ObservableArrayStats>;
+  sort(array: IObservableArray): Promise<void>;
 }
 
 export interface IObservableArrayConfigProvider {

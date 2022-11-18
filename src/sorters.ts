@@ -1,112 +1,115 @@
-import { IObservableArray, IObservableArraySorter, ObservableArrayAbortError, ObservableArrayStats } from "./observableArray/observableArrayDriver";
+import { IObservableArray } from "./observableArray/observableArrayDriver";
+import { ObservableArraySorterBase } from "./observableArray/observableArraySorterBase";
 
-abstract class ObservableArraySorterBase implements IObservableArraySorter {
-  protected abstract _sort(array: IObservableArray): Promise<ObservableArrayStats>;
-  public sort = async (array: IObservableArray): Promise<ObservableArrayStats> => {
-    try {
-      const stats = await this._sort(array);
-      return stats;
-    }
-    catch (e: unknown) {
-      if (e instanceof ObservableArrayAbortError) {
-        return null;
-      }
-      throw e;
-    }
-  }
-}
- 
+export type Lookup = { [key: string]: number | string | boolean | number[] };
+
 export class ObservableBubbleSort extends ObservableArraySorterBase {
-  protected _sort = async (array: IObservableArray): Promise<ObservableArrayStats> => {
-    for (let i = 0; i < array.length; i++) {
-      for (let j = 0; j < array.length - i - 1; j++) {
-        if (await array.compare(j, '>', j + 1)) {
-          await array.swap(j, j + 1);
+  protected _sort = async (array: IObservableArray, vars: Lookup): Promise<void> => {
+    for (vars.i= 0; vars.i < array.length; vars.i++) {
+      for (vars.j = 0; vars.j < array.length - vars.i - 1; vars.j++) {
+        if (await array.compare(vars.j, '>', vars.j + 1)) {
+          await array.swap(vars.j, vars.j + 1);
         }
       }
+      delete vars.j;
     }
-    return array.stats;
+    delete vars.i;
   }
 }
 
 export class ObservableInsertionSort extends ObservableArraySorterBase {
-  protected _sort = async (array: IObservableArray): Promise<ObservableArrayStats> => {
-    for (let i = 0; i < array.length; i++) {
-      let j = i;
-      let x = await array.get(i);
-      while (j > 0 && await array.compareWithVal(j-1, '>', x)) { 
-        await array.set(j, await array.get(--j)); // TODO: (classification) isn't this a swap?
+  protected _sort = async (array: IObservableArray, vars: Lookup): Promise<void> => {
+    for (vars.i = 0; vars.i < array.length; vars.i++) {
+      vars.j = vars.i;
+      vars.x = await array.get(vars.i);
+      while (vars.j > 0 && await array.compareWithVal(vars.j-1, '>', vars.x)) { 
+        await array.set(vars.j, await array.get(--vars.j)); // TODO: (classification) isn't this a swap?
       }
-      await array.set(j, x);
+      await array.set(vars.j, vars.x);
+      delete vars.x;
+      delete vars.j;
     }
-    return array.stats;
+    delete vars.i;
   }
 }
 
 export class ObservableSelectionSort extends ObservableArraySorterBase {
-  protected _sort = async (array: IObservableArray): Promise<ObservableArrayStats> => {
-    for (let i = 0; i < array.length - 1; i++) {
-      let minIndex = i;
-      for (let j = i + 1; j < array.length; j++) {
-        if (await array.compare(j, '<', minIndex)) {
-          minIndex = j;
+  protected _sort = async (array: IObservableArray, vars: Lookup): Promise<void> => {
+    for (vars.i = 0; vars.i < array.length - 1; vars.i++) {
+      vars.minIndex = vars.i;
+      for (vars.j = vars.i + 1; vars.j < array.length; vars.j++) {
+        if (await array.compare(vars.j, '<', vars.minIndex)) {
+          vars.minIndex = vars.j;
         }
       }
-      await array.swap(i, minIndex);
+      await array.swap(vars.i, vars.minIndex);
+      delete vars.minIndex;
     }
-    return array.stats;
   }
 }
 
 export class ObservableQuickSort extends ObservableArraySorterBase {
-  protected _sort = async (array: IObservableArray): Promise<ObservableArrayStats> => {
-    await this.quickSort(array, 0, array.length - 1);
-    return array.stats;
+  protected _sort = async (array: IObservableArray, vars: Lookup): Promise<void> => {
+    await this.quickSort(array, vars, 0, array.length - 1);
+    delete vars.pivotIndex; // Cannot remove this in a recursive function, so we do it here.
   }
 
-  private quickSort = async (array: IObservableArray, low: number, high: number): Promise<void> => {
+  private quickSort = async (array: IObservableArray, vars: Lookup, low: number, high: number): Promise<void> => {
     if (low < high) {;
-      const pi = await this.partition(array, low, high, await this.findPivot(array, low, high));
-      await this.quickSort(array, low, pi - 1);
-      await this.quickSort(array, pi + 1, high);
+      vars.pivotIndex = await this.partition(array, vars, low, high, await this.findPivot(array, vars, low, high));
+      await this.quickSort(array, vars, low, vars.pivotIndex - 1);
+      await this.quickSort(array, vars, vars.pivotIndex + 1, high);
     }
   }
 
-  private partition = async (array: IObservableArray, low: number, high: number, pivotIndex: number): Promise<number> => {
-    const pivot = await array.get(pivotIndex);
+  private partition = async (array: IObservableArray, vars: Lookup, low: number, high: number, pivotIndex: number): Promise<number> => {
+    vars.pivotValue = await array.get(pivotIndex);
     await array.swap(pivotIndex, high);
-    let i = low;
+    vars.i = low;
 
-    for (let j = low; j < high; j++) {
-      if (await array.compareWithVal(j, '<=', pivot)) {
-        await array.swap(i, j);
-        i++;
+    for (vars.j = low; vars.j < high; vars.j++) {
+      if (await array.compareWithVal(vars.j, '<=', vars.pivotValue)) {
+        await array.swap(vars.i, vars.j);
+        vars.i++;
       }
     }
-    await array.swap(i, high);
-    return i;
+    delete vars.j;
+
+    await array.swap(vars.i, high);
+    delete vars.pivotValue;
+    const iTemp = vars.i;
+    delete vars.i;
+    return iTemp;
   }
 
-  private findPivot = async (array: IObservableArray, low: number, high: number): Promise<number> => {
-		const mid = Math.floor((low + high) / 2);
+  private findPivot = async (array: IObservableArray, vars: Lookup, low: number, high: number): Promise<number> => {
+		vars.midIndex = Math.floor((low + high) / 2);
 
-		const a = array.get(low);
-		const b = array.get(mid);
-		const c = array.get(high);
+		vars.lowValue = await array.get(low);
+		vars.midValue = await array.get(vars.midIndex);
+		vars.highValue = await array.get(high);
+
 
     const xor = (a: boolean, b: boolean) => (a || b) && !(a && b);
 
-    if (xor((a > b), (a > c))) // TODO: (classification) aren't these comparisons?
-      return low;
-    else if (xor((b < a), (b < c))) // TODO: (classification) aren't these comparisons?
-      return mid;
+    let pivotIndex = 0;
+    if (xor((vars.lowValue > vars.midValue), (vars.lowValue > vars.highValue))) // TODO: (classification) aren't these comparisons?
+      pivotIndex = low;
+    else if (xor((vars.midValue < vars.lowValue), (vars.midValue < vars.highValue))) // TODO: (classification) aren't these comparisons?
+      pivotIndex = vars.midIndex;
     else
-      return high;
+      pivotIndex = high;
+
+    delete vars.lowValue;
+    delete vars.midValue;
+    delete vars.highValue;
+    delete vars.midIndex;
+    return pivotIndex;
 	}
 }
 
-export class ObservableHeapSort extends ObservableArraySorterBase {
-  protected _sort = async (array: IObservableArray): Promise<ObservableArrayStats> => {
+export class ObservableHeapSort extends ObservableArraySorterBase { // TODO: Convert to use observable vars
+  protected _sort = async (array: IObservableArray): Promise<void> => {
     for (let i = Math.floor(array.length / 2) - 1; i >= 0; i--) {
       await this.heapify(array, array.length, i);
     }
@@ -115,7 +118,6 @@ export class ObservableHeapSort extends ObservableArraySorterBase {
       await array.swap(0, i);
       await this.heapify(array, i, 0);
     }
-    return array.stats;
   }
 
   private heapify = async (array: IObservableArray, n: number, i: number): Promise<void> => {
@@ -138,13 +140,12 @@ export class ObservableHeapSort extends ObservableArraySorterBase {
   }
 }
 
-export class ObservableRadixSort extends ObservableArraySorterBase {
-  protected _sort = async (array: IObservableArray): Promise<ObservableArrayStats> => {
+export class ObservableRadixSort extends ObservableArraySorterBase { // TODO: Convert to use observable vars
+  protected _sort = async (array: IObservableArray): Promise<void> => {
     const max = await this.getMax(array);
     for (let exp = 1; Math.floor(max / exp) > 0; exp *= 10) {
       await this.countSort(array, exp);
     }
-    return array.stats;
   }
 
   private getMax = async (array: IObservableArray): Promise<number> => {
@@ -180,8 +181,8 @@ export class ObservableRadixSort extends ObservableArraySorterBase {
   }
 }
 
-export class ObservableShellSort extends ObservableArraySorterBase {
-  protected _sort = async (array: IObservableArray): Promise<ObservableArrayStats> => {
+export class ObservableShellSort extends ObservableArraySorterBase { // TODO: Convert to use observable vars
+  protected _sort = async (array: IObservableArray): Promise<void> => {
     for (let gap = Math.floor(array.length / 2); gap > 0; gap = Math.floor(gap / 2)) {
       for (let i = gap; i < array.length; i++) {
         let temp = await array.get(i);
@@ -192,12 +193,11 @@ export class ObservableShellSort extends ObservableArraySorterBase {
         await array.set(j, temp);
       }
     }
-    return array.stats;
   }
 }
 
-export class ObservableCombSort extends ObservableArraySorterBase {
-  protected _sort = async (array: IObservableArray): Promise<ObservableArrayStats> => {
+export class ObservableCombSort extends ObservableArraySorterBase { // TODO: Convert to use observable vars
+  protected _sort = async (array: IObservableArray): Promise<void> => {
     let gap = array.length;
     let swapped = true;
 
@@ -212,37 +212,35 @@ export class ObservableCombSort extends ObservableArraySorterBase {
         }
       }
     }
-    return array.stats;
   }
 }
 
-export class ObservableMergeSort extends ObservableArraySorterBase {
-  protected _sort = async (array: IObservableArray): Promise<ObservableArrayStats> => {
-    await this.mergeSort(array, 0, array.length - 1);
-    return array.stats;
+export class ObservableMergeSort extends ObservableArraySorterBase { // TODO: Convert to use observable vars
+  protected _sort = async (array: IObservableArray, vars: Lookup): Promise<void> => {
+    await this.mergeSort(array, vars, 0, array.length - 1);
   }
 
-  private mergeSort = async (array: IObservableArray, l: number, r: number): Promise<void> => {
+  private mergeSort = async (array: IObservableArray, vars: Lookup, l: number, r: number): Promise<void> => {
     if (l < r) {
       const m = Math.floor((l + r) / 2);
-      await this.mergeSort(array, l, m);
-      await this.mergeSort(array, m + 1, r);
-      await this.merge(array, l, m, r);
+      await this.mergeSort(array, vars, l, m);
+      await this.mergeSort(array, vars, m + 1, r);
+      await this.merge(array, vars, l, m, r);
     }
   }
 
-  private merge = async (array: IObservableArray, l: number, m: number, r: number): Promise<void> => {
+  private merge = async (array: IObservableArray, vars: Lookup, l: number, m: number, r: number): Promise<void> => {
     const n1 = m - l + 1;
     const n2 = r - m;
 
-    const L = new Array(n1);
-    const R = new Array(n2);
+    vars.L = new Array(n1);
+    vars.R = new Array(n2);
 
     for (let i = 0; i < n1; i++) {
-      L[i] = await array.get(l + i);
+      vars.L[i] = await array.get(l + i);
     }
     for (let j = 0; j < n2; j++) {
-      R[j] = await array.get(m + 1 + j);
+      vars.R[j] = await array.get(m + 1 + j);
     }
 
     let i = 0;
@@ -250,26 +248,29 @@ export class ObservableMergeSort extends ObservableArraySorterBase {
     let k = l;
 
     while (i < n1 && j < n2) {
-      if (L[i] <= R[j]) {
-        await array.set(k, L[i++]);
+      if (vars.L[i] <= vars.R[j]) {
+        await array.set(k, vars.L[i++]);
       } else {
-        await array.set(k, R[j++]);
+        await array.set(k, vars.R[j++]);
       }
       k++;
     }
 
     while (i < n1) {
-      await array.set(k++, L[i++]);
+      await array.set(k++, vars.L[i++]);
     }
 
     while (j < n2) {
-      await array.set(k++, R[j++]);
+      await array.set(k++, vars.R[j++]);
     }
+
+    delete vars.L;
+    delete vars.R;
   }
 }
 
-export class ObservablePigeonholeSort extends ObservableArraySorterBase {
-  protected _sort = async (array: IObservableArray): Promise<ObservableArrayStats> => {
+export class ObservablePigeonholeSort extends ObservableArraySorterBase { // TODO: Convert to use observable vars
+  protected _sort = async (array: IObservableArray): Promise<void> => {
     const min = await this.getMin(array);
     const max = await this.getMax(array);
     const range = max - min + 1;
@@ -286,7 +287,6 @@ export class ObservablePigeonholeSort extends ObservableArraySorterBase {
         await array.set(i++, count + min);
       }
     }
-    return array.stats;
   }
 
   private getMin = async (array: IObservableArray): Promise<number> => {

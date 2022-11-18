@@ -1,7 +1,6 @@
-import { CSSClassNames, CSSColorRules, DOMSelectors } from "../constants";
+import { CSSColorRules, DOMSelectors } from "../constants";
 
 export interface IObservableArrayVisualizerConfigProvider {
-
 }
 
 export interface IObservableArrayVisualizer {
@@ -14,25 +13,20 @@ export interface IObservableArrayVisualizer {
   rebuildArray(sourceArray: number[]): void;
 }
 
-export default function createObservableArrayVisualizer(configProvider: IObservableArrayVisualizerConfigProvider) {
+export default function createObservableArrayVisualizer(configProvider: IObservableArrayVisualizerConfigProvider): IObservableArrayVisualizer {
   return new ObservableArrayVisualizer(configProvider);
 }
 
 class ObservableArrayVisualizer implements IObservableArrayVisualizer {
   private readonly _configProvider: IObservableArrayVisualizerConfigProvider;
   private readonly _arrayContainer: HTMLDivElement;
-  private readonly _controlsContainer: HTMLDivElement;
 
   public constructor(configProvider: IObservableArrayVisualizerConfigProvider) {
     this._configProvider = configProvider;
-    this._arrayContainer = document.createElement("div");
-    this._arrayContainer.className = CSSClassNames.arrayContainer
-
-    document.getElementById(DOMSelectors.arrayContainer).append(this._arrayContainer);
+    this._arrayContainer = document.getElementById(DOMSelectors.arrayContainer) as HTMLDivElement;
   }
-  private _array: HTMLCollection;
 
-  public get controlsContainer(): HTMLDivElement { return this._controlsContainer }
+  private _array: HTMLCollection;
 
   // Helper to access array indicies, since we always have to retrieve `.children[0]`
   private get = (index: number): HTMLDivElement => this._array[index].children[0] as HTMLDivElement
@@ -48,7 +42,7 @@ class ObservableArrayVisualizer implements IObservableArrayVisualizer {
   }
 
   public setStyle = (index: number, type: keyof typeof CSSColorRules): void => {
-    this.get(index).className = CSSColorRules[type] // TODO: Move these to CSSClassNames
+    this.get(index).className = CSSColorRules[type]
   }
 
   public setValue = (index: number, value: number): void => {

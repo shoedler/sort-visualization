@@ -1,7 +1,3 @@
-export const CSSClassNames = {
-  arrayContainer: 'observable-array',
-}
-
 export const CSSColorRules = {
   compareColorA: "bar-compare-a",
   compareColorB: "bar-compare-b",
@@ -23,6 +19,7 @@ export const CSSRules = {
 
 export const DOMSelectors = {
   arrayContainer: "array-container",
+  arrayVars: "array-vars",
   controlsContainer: "controls-container",
 }
 

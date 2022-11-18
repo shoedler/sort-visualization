@@ -1,16 +1,16 @@
 import { ButtonApi, InputBindingApi, ListApi, MonitorBindingApi, Pane } from "tweakpane";
 import * as TweakpaneWaveformPlugin from "tweakpane-plugin-waveform"; 
-import { LocalStorageKeys } from "./constants";
+import { DOMSelectors, LocalStorageKeys } from "./constants";
 import { Sorters } from "./index";
 import { Model } from "./model";
 import { ObservableArrayDriver, ObservableArrayStats } from "./observableArray/observableArrayDriver";
-import { IViewService } from "./viewService";
+import { IStyleService } from "./styleService";
 
 export default function useController(
   model: Model,
-  viewService: IViewService,
+  styleService: IStyleService,
   observableArray: ObservableArrayDriver): IController {
-  return new Controller(model, viewService,  observableArray)
+  return new Controller(model, styleService,  observableArray)
 }
 
 interface IController {
@@ -19,11 +19,11 @@ interface IController {
 
 class Controller {
   private readonly _model: Model;
-  private readonly _viewService: IViewService;
+  private readonly _styleService: IStyleService;
   private readonly _observableArray: ObservableArrayDriver;
   private readonly _pane: Pane;
   private _sourceArray: number[] = [];
-  private _sorterPromise: Promise<ObservableArrayStats>;
+  private _sorterPromise: Promise<void>;
 
   private _buttonGenerate: ButtonApi;
   private _buttonSort: ButtonApi;
@@ -57,13 +57,13 @@ class Controller {
 
   constructor(
     model: Model,
-    viewService: IViewService,
+    styleService: IStyleService,
     observableArray: ObservableArrayDriver) {
     this._model = model;
-    this._viewService = viewService;
+    this._styleService = styleService;
     this._observableArray = observableArray;
     this._pane = new Pane({
-      container: this._viewService.controlsContainer,
+      container: document.getElementById(DOMSelectors.controlsContainer),
     });
     this._pane.registerPlugin(TweakpaneWaveformPlugin)
   }
@@ -202,7 +202,7 @@ class Controller {
       min: 0.1,
       max: 0.9,
       step: 0.05
-    }).on('change', () => this._viewService.updateCssBarWidthRule('barWidth'))
+    }).on('change', () => this._styleService.updateCssBarWidthRule('barWidth'))
 
     this._selectorTransTime = visualParamsTab.addInput(this._model, 'transitionTime', {
       label: 'transition time',
@@ -213,37 +213,37 @@ class Controller {
         "Slow": 0.7,
         "🦥": 1.2
       },
-    }).on('change', () => this._viewService.updateCssTimeRule('transitionTime'))
+    }).on('change', () => this._styleService.updateCssTimeRule('transitionTime'))
 
     this._sliderCompareColorA = visualParamsTab.addInput(this._model, 'compareColorA', {
       label: 'compare a',
       view: 'color',
-    }).on('change', () => this._viewService.updateCssColorRule('compareColorA'))
+    }).on('change', () => this._styleService.updateCssColorRule('compareColorA'))
     
     this._sliderCompareColorB = visualParamsTab.addInput(this._model, 'compareColorB', {
       label: 'compare b',
       view: 'color',
-    }).on('change', () => this._viewService.updateCssColorRule('compareColorB'))
+    }).on('change', () => this._styleService.updateCssColorRule('compareColorB'))
 
     this._sliderReadColor = visualParamsTab.addInput(this._model, 'readColor', {
       label: 'read',
       view: 'color',
-    }).on('change', () => this._viewService.updateCssColorRule('readColor'))
+    }).on('change', () => this._styleService.updateCssColorRule('readColor'))
 
     this._sliderSwapColorA = visualParamsTab.addInput(this._model, 'swapColorA', {
       label: 'swap a',
       view: 'color',
-    }).on('change', () => this._viewService.updateCssColorRule('swapColorA'))
+    }).on('change', () => this._styleService.updateCssColorRule('swapColorA'))
 
     this._sliderSwapColorB = visualParamsTab.addInput(this._model, 'swapColorB', {
       label: 'swap b',
       view: 'color',
-    }).on('change', () => this._viewService.updateCssColorRule('swapColorB'))
+    }).on('change', () => this._styleService.updateCssColorRule('swapColorB'))
 
     this._sliderWriteColor = visualParamsTab.addInput(this._model, 'writeColor', {
       label: 'write',
       view: 'color',
-    }).on('change', () => this._viewService.updateCssColorRule('writeColor'))
+    }).on('change', () => this._styleService.updateCssColorRule('writeColor'))
     
 
     this._sliderGain = audioParamsTab.addInput(this._model, 'gain', {

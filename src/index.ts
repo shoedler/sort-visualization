@@ -12,7 +12,7 @@ import {
   ObservableRadixSort,
   ObservableSelectionSort,
   ObservableShellSort } from "./sorters";
-import useViewService from "./viewService";
+import useStyleService from "./styleService";
 
 export const Sorters: { [key: string]: IObservableArraySorter } = {
   "Bubble": new ObservableBubbleSort(),
@@ -30,9 +30,9 @@ export const Sorters: { [key: string]: IObservableArraySorter } = {
 (() => {
   document.addEventListener("DOMContentLoaded", _ => {
     const model = new Model();
+    const styleService = useStyleService(model);
     const array = new ObservableArrayDriver(model);
-    const viewService = useViewService(model);
-    const controller = useController(model, viewService, array) 
+    const controller = useController(model, styleService, array) 
   
     controller.run();
   })
