@@ -108,7 +108,8 @@ export class ObservableQuickSort extends ObservableArraySorterBase {
 }
 
 export class ObservableHeapSort extends ObservableArraySorterBase { // TODO: Convert to use observable vars
-  protected _sort = async (array: IObservableArray): Promise<void> => {
+  protected _sort = async (array: IObservableArray, vars: Lookup): Promise<void> => {
+    vars.note = "Observable variables are not yet supported in this algorithm.";
     for (let i = Math.floor(array.length / 2) - 1; i >= 0; i--) {
       await this.heapify(array, array.length, i);
     }
@@ -117,6 +118,7 @@ export class ObservableHeapSort extends ObservableArraySorterBase { // TODO: Con
       await array.swap(0, i);
       await this.heapify(array, i, 0);
     }
+    delete vars.note;
   }
 
   private heapify = async (array: IObservableArray, n: number, i: number): Promise<void> => {
@@ -140,11 +142,13 @@ export class ObservableHeapSort extends ObservableArraySorterBase { // TODO: Con
 }
 
 export class ObservableRadixSort extends ObservableArraySorterBase { // TODO: Convert to use observable vars
-  protected _sort = async (array: IObservableArray): Promise<void> => {
+  protected _sort = async (array: IObservableArray, vars: Lookup): Promise<void> => {
+    vars.note = "Observable variables are not yet supported in this algorithm.";
     const max = await this.getMax(array);
     for (let exp = 1; Math.floor(max / exp) > 0; exp *= 10) {
       await this.countSort(array, exp);
     }
+    delete vars.note;
   }
 
   private getMax = async (array: IObservableArray): Promise<number> => {
@@ -200,7 +204,8 @@ export class ObservableShellSort extends ObservableArraySorterBase {
 }
 
 export class ObservableCombSort extends ObservableArraySorterBase { // TODO: Convert to use observable vars
-  protected _sort = async (array: IObservableArray): Promise<void> => {
+  protected _sort = async (array: IObservableArray, vars: Lookup): Promise<void> => {
+    vars.note = "Observable variables are not yet supported in this algorithm.";
     let gap = array.length;
     let swapped = true;
 
@@ -215,12 +220,15 @@ export class ObservableCombSort extends ObservableArraySorterBase { // TODO: Con
         }
       }
     }
+    delete vars.note;
   }
 }
 
 export class ObservableMergeSort extends ObservableArraySorterBase { // TODO: Convert to use observable vars
   protected _sort = async (array: IObservableArray, vars: Lookup): Promise<void> => {
+    vars.note = "Observable variables are not fully supported in this algorithm.";
     await this.mergeSort(array, vars, 0, array.length - 1);
+    delete vars.note;
   }
 
   private mergeSort = async (array: IObservableArray, vars: Lookup, l: number, r: number): Promise<void> => {
@@ -273,7 +281,8 @@ export class ObservableMergeSort extends ObservableArraySorterBase { // TODO: Co
 }
 
 export class ObservablePigeonholeSort extends ObservableArraySorterBase { // TODO: Convert to use observable vars
-  protected _sort = async (array: IObservableArray): Promise<void> => {
+  protected _sort = async (array: IObservableArray, vars: Lookup): Promise<void> => {
+    vars.note = "Observable variables are not yet supported in this algorithm.";
     const min = await this.getMin(array);
     const max = await this.getMax(array);
     const range = max - min + 1;
@@ -290,6 +299,7 @@ export class ObservablePigeonholeSort extends ObservableArraySorterBase { // TOD
         await array.set(i++, count + min);
       }
     }
+    delete vars.note;
   }
 
   private getMin = async (array: IObservableArray): Promise<number> => {
