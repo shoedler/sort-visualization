@@ -1,6 +1,6 @@
 # sort-visualization
 
-A simple, zero-dependency[^1], HTML5 + WebAdudioAPI-based sorting-algorithm-visualiser.
+A simple, zero-dependency[^1], HTML5 + Web Audio API-based visualiser for popular sorting algorithms.
 
 ![image](https://github.com/user-attachments/assets/ca28c174-b8dc-420e-9241-b58ce6c4e47a)
 
