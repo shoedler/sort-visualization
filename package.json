@@ -1,7 +1,10 @@
 {
-  "name": "app-sort-visualization",
+  "name": "sort-visualization",
   "version": "0.0.1",
-  "description": "View, and listen to different sorting algorithms",
+  "description": "A simple, zero-dependency, HTML5 + Web Audio API-based visualiser for popular sorting algorithms.",
+  "author": "shoedler",
+  "license": "Apache-2.0",
+  "main": "dist/bundle.js",
   "scripts": {
     "watch-build": "webpack --watch",
     "watch-compile": "tsc --watch",
